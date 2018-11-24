@@ -1,4 +1,4 @@
-# parse_gitignore
+# gitignore_parser
 A spec-compliant gitignore parser for Python 3.5+
 
 ## Installation
@@ -20,7 +20,7 @@ Then:
     True
     >>> matches('/home/michael/project/dir/main.pyc')
     True
-    >>> matches('/home/michael/project/__pycache__/')
+    >>> matches('/home/michael/project/__pycache__')
     True
 
 ## Motivation
