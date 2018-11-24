@@ -4,22 +4,19 @@ See:
 https://github.com/mherrmann/gitignore_parser
 """
 
-from glob import glob
-from os.path import relpath, join, isdir
-
-from setuptools import setup, find_packages
+from setuptools import setup
 
 description = 'A spec-compliant gitignore parser for Python 3.5+'
 setup(
     name='gitignore_parser',
-    version='0.0.1',
+    version='0.0.3',
     description=description,
     long_description=
         description + '\n\nhttps://github.com/mherrmann/gitignore_parser',
     author='Michael Herrmann',
     author_email='michael+removethisifyouarehuman@herrmann.io',
     url='https://github.com/mherrmann/gitignore_parser',
-    packages=find_packages(),
+    py_modules=['gitignore_parser'],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
