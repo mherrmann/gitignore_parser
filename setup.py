@@ -11,8 +11,7 @@ setup(
     name='gitignore_parser',
     version='0.0.4',
     description=description,
-    long_description=
-        description + '\n\nhttps://github.com/mherrmann/gitignore_parser',
+    long_description=        description + '\n\nhttps://github.com/mherrmann/gitignore_parser',
     author='Michael Herrmann',
     author_email='michael+removethisifyouarehuman@herrmann.io',
     url='https://github.com/mherrmann/gitignore_parser',
