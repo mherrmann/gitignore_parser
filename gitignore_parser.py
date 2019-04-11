@@ -166,5 +166,6 @@ def fnmatch_pathname_to_regex(pattern):
 				res.append('[{}]'.format(stuff))
 		else:
 			res.append(re.escape(c))
-	res.append('\Z(?ms)')
+	res.insert(0, '(?ms)')
+	res.append('\Z')
 	return ''.join(res)
