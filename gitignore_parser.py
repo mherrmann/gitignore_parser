@@ -1,6 +1,6 @@
 import collections
 import os
-import regex as re
+import re
 
 from os.path import dirname, abspath
 from pathlib import Path
@@ -173,5 +173,5 @@ def fnmatch_pathname_to_regex(pattern):
 		else:
 			res.append(re.escape(c))
 	res.insert(0, '(?ms)')
-	res.append('\\Z')
+	res.append('$')
 	return ''.join(res)

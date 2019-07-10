@@ -17,7 +17,6 @@ setup(
     author_email='michael+removethisifyouarehuman@herrmann.io',
     url='https://github.com/mherrmann/gitignore_parser',
     py_modules=['gitignore_parser'],
-    install_requires=['regex'],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
