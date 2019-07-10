@@ -129,14 +129,14 @@ def fnmatch_pathname_to_regex(pattern):
 	res = []
 	while i < n:
 		c = pattern[i]
-		i = i + 1
+		i += 1
 		if c == '*':
 			try:
 				if pattern[i] == '*':
-					i = i + 1
+					i += 1
 					res.append('.*')
 					if pattern[i] == '/':
-						i = i + 1
+						i += 1
 						res.append(''.join([os.sep, '?']))
 				else:
 					res.append(''.join([nonsep, '*']))
@@ -149,23 +149,23 @@ def fnmatch_pathname_to_regex(pattern):
 		elif c == '[':
 			j = i
 			if j < n and pattern[j] == '!':
-				j = j + 1
+				j += 1
 			if j < n and pattern[j] == ']':
-				j = j + 1
+				j += 1
 			while j < n and pattern[j] != ']':
-				j = j+1
+				j += 1
 			if j >= n:
 				res.append('\\[')
 			else:
 				stuff = pattern[i:j].replace('\\', '\\\\')
-				i = j+1
+				i = j + 1
 				if stuff[0] == '!':
-					stuff = ''.join('^', stuff[1:])
+					stuff = ''.join(['^', stuff[1:]])
 				elif stuff[0] == '^':
 					stuff = ''.join('\\' + stuff)
 				res.append('[{}]'.format(stuff))
 		else:
 			res.append(re.escape(c))
 	res.insert(0, '(?ms)')
-	res.append('\Z')
+	res.append('\\Z')
 	return ''.join(res)
