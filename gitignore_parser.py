@@ -1,6 +1,6 @@
 import collections
 import os
-import re
+import regex as re
 
 from os.path import dirname, abspath
 from pathlib import Path
