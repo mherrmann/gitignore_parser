@@ -125,7 +125,13 @@ def fnmatch_pathname_to_regex(pattern):
 	the path seperator will not match shell-style '*' and '.' wildcards.
 	"""
 	i, n = 0, len(pattern)
-	nonsep = ''.join(['[^', os.sep, ']'])
+	
+	seps = [re.escape(os.sep)]
+	if os.altsep is not None:
+		seps.append(re.escape(os.altsep))
+	seps_group = '[' + '|'.join(seps) + ']'
+	nonsep = r'[^{}]'.format('|'.join(seps))
+
 	res = []
 	while i < n:
 		c = pattern[i]
@@ -137,7 +143,7 @@ def fnmatch_pathname_to_regex(pattern):
 					res.append('.*')
 					if pattern[i] == '/':
 						i += 1
-						res.append(''.join([os.sep, '?']))
+						res.append(''.join([seps_group, '?']))
 				else:
 					res.append(''.join([nonsep, '*']))
 			except IndexError:
@@ -145,7 +151,7 @@ def fnmatch_pathname_to_regex(pattern):
 		elif c == '?':
 			res.append(nonsep)
 		elif c == '/':
-			res.append(os.sep)
+			res.append(seps_group)
 		elif c == '[':
 			j = i
 			if j < n and pattern[j] == '!':
