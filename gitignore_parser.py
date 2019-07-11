@@ -125,19 +125,25 @@ def fnmatch_pathname_to_regex(pattern):
 	the path seperator will not match shell-style '*' and '.' wildcards.
 	"""
 	i, n = 0, len(pattern)
-	nonsep = ''.join(['[^', os.sep, ']'])
+	
+	seps = [re.escape(os.sep)]
+	if os.altsep is not None:
+		seps.append(re.escape(os.altsep))
+	seps_group = '[' + '|'.join(seps) + ']'
+	nonsep = r'[^{}]'.format('|'.join(seps))
+
 	res = []
 	while i < n:
 		c = pattern[i]
-		i = i + 1
+		i += 1
 		if c == '*':
 			try:
 				if pattern[i] == '*':
-					i = i + 1
+					i += 1
 					res.append('.*')
 					if pattern[i] == '/':
-						i = i + 1
-						res.append(''.join([os.sep, '?']))
+						i += 1
+						res.append(''.join([seps_group, '?']))
 				else:
 					res.append(''.join([nonsep, '*']))
 			except IndexError:
@@ -145,27 +151,27 @@ def fnmatch_pathname_to_regex(pattern):
 		elif c == '?':
 			res.append(nonsep)
 		elif c == '/':
-			res.append(os.sep)
+			res.append(seps_group)
 		elif c == '[':
 			j = i
 			if j < n and pattern[j] == '!':
-				j = j + 1
+				j += 1
 			if j < n and pattern[j] == ']':
-				j = j + 1
+				j += 1
 			while j < n and pattern[j] != ']':
-				j = j+1
+				j += 1
 			if j >= n:
 				res.append('\\[')
 			else:
 				stuff = pattern[i:j].replace('\\', '\\\\')
-				i = j+1
+				i = j + 1
 				if stuff[0] == '!':
-					stuff = ''.join('^', stuff[1:])
+					stuff = ''.join(['^', stuff[1:]])
 				elif stuff[0] == '^':
 					stuff = ''.join('\\' + stuff)
 				res.append('[{}]'.format(stuff))
 		else:
 			res.append(re.escape(c))
 	res.insert(0, '(?ms)')
-	res.append('\Z')
+	res.append('$')
 	return ''.join(res)
