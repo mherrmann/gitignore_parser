@@ -1,5 +1,5 @@
 # gitignore_parser
-A spec-compliant gitignore parser for Python 3.5+
+A spec-compliant gitignore parser for Python
 
 ## Installation
     pip install gitignore_parser
