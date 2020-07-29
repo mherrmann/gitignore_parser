@@ -5,6 +5,16 @@ import re
 from os.path import dirname, abspath
 from pathlib import Path
 
+def handle_negation(file_path, rules):
+    	matched = False
+	for rule in rules:
+		if rule.match(file_path):
+			if rule.negation:
+				matched = False
+			else:
+				matched = True
+	return matched
+
 def parse_gitignore(full_path, base_dir=None):
 	if base_dir is None:
 		base_dir = dirname(full_path)
@@ -14,11 +24,16 @@ def parse_gitignore(full_path, base_dir=None):
 		for line in ignore_file:
 			counter += 1
 			line = line.rstrip('\n')
-			rule = rule_from_pattern(line, abspath(base_dir),
+			rule = rule_from_pattern(line, base_path=abspath(base_dir),
 									 source=(full_path, counter))
 			if rule:
 				rules.append(rule)
-	return lambda file_path: any(r.match(file_path) for r in rules)
+	if not any(r.negation for r in rules):
+		return lambda file_path: any(r.match(file_path) for r in rules)
+	else:
+		# We have negation rules. We can't use a simple "any" to evaluate them.
+		# Later rules override earlier rules.
+		return lambda file_path: handle_negation(file_path, rules)
 
 def rule_from_pattern(pattern, base_path=None, source=None):
 	"""
@@ -34,7 +49,7 @@ def rule_from_pattern(pattern, base_path=None, source=None):
 	# Store the exact pattern for our repr and string functions
 	orig_pattern = pattern
 	# Early returns follow
-	# Discard comments and seperators
+	# Discard comments and separators
 	if pattern.strip() == '' or pattern[0] == '#':
 		return
 	# Discard anything with more than two consecutive asterisks
@@ -65,16 +80,14 @@ def rule_from_pattern(pattern, base_path=None, source=None):
 	anchored = '/' in pattern[:-1]
 	if pattern[0] == '/':
 		pattern = pattern[1:]
-	if pattern[0] == '*' and pattern[1] == '*':
+	if pattern[0] == '*' and len(pattern) >= 2 and pattern[1] == '*':
 		pattern = pattern[2:]
 		anchored = False
 	if pattern[0] == '/':
 		pattern = pattern[1:]
 	if pattern[-1] == '/':
 		pattern = pattern[:-1]
-	regex = fnmatch_pathname_to_regex(
-		pattern
-	)
+	regex = fnmatch_pathname_to_regex(pattern)
 	if anchored:
 		regex = ''.join(['^', regex])
 	return IgnoreRule(
@@ -122,7 +135,7 @@ class IgnoreRule(collections.namedtuple('IgnoreRule_', IGNORE_RULE_FIELDS)):
 def fnmatch_pathname_to_regex(pattern):
 	"""
 	Implements fnmatch style-behavior, as though with FNM_PATHNAME flagged;
-	the path seperator will not match shell-style '*' and '.' wildcards.
+	the path separator will not match shell-style '*' and '.' wildcards.
 	"""
 	i, n = 0, len(pattern)
 	
