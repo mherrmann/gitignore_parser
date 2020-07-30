@@ -2,11 +2,11 @@ import collections
 import os
 import re
 
-from os.path import dirname, abspath
+from os.path import dirname
 from pathlib import Path
 
 def handle_negation(file_path, rules):
-    	matched = False
+	matched = False
 	for rule in rules:
 		if rule.match(file_path):
 			if rule.negation:
@@ -24,7 +24,7 @@ def parse_gitignore(full_path, base_dir=None):
 		for line in ignore_file:
 			counter += 1
 			line = line.rstrip('\n')
-			rule = rule_from_pattern(line, base_path=abspath(base_dir),
+			rule = rule_from_pattern(line, base_path=Path(base_dir).resolve(),
 									 source=(full_path, counter))
 			if rule:
 				rules.append(rule)
@@ -44,7 +44,7 @@ def rule_from_pattern(pattern, base_path=None, source=None):
 	Because git allows for nested .gitignore files, a base_path value
 	is required for correct behavior. The base path should be absolute.
 	"""
-	if base_path and base_path != abspath(base_path):
+	if base_path and base_path != Path(base_path).resolve():
 		raise ValueError('base_path must be absolute')
 	# Store the exact pattern for our repr and string functions
 	orig_pattern = pattern
@@ -120,7 +120,7 @@ class IgnoreRule(collections.namedtuple('IgnoreRule_', IGNORE_RULE_FIELDS)):
 	def match(self, abs_path):
 		matched = False
 		if self.base_path:
-			rel_path = str(Path(abs_path).relative_to(self.base_path))
+			rel_path = str(Path(abs_path).resolve().relative_to(self.base_path))
 		else:
 			rel_path = str(Path(abs_path))
 		if rel_path.startswith('./'):
