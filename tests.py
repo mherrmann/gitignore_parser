@@ -14,6 +14,18 @@ class Test(TestCase):
 		self.assertTrue(matches('/home/michael/dir/main.pyc'))
 		self.assertTrue(matches('/home/michael/__pycache__'))
 
+	def test_negation(self):
+		matches = _parse_gitignore_string(
+			'''
+*.ignore
+!keep.ignore
+			''',
+			fake_base_dir='/home/michael'
+		)
+		self.assertTrue(matches('/home/michael/trash.ignore'))
+		self.assertFalse(matches('/home/michael/keep.ignore'))
+		self.assertTrue(matches('/home/michael/waste.ignore'))
+
 def _parse_gitignore_string(s, fake_base_dir=None):
 	with NamedTemporaryFile('w') as tmp:
 		tmp.write(s)
