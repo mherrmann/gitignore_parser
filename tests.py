@@ -74,6 +74,18 @@ class Test(TestCase):
 		self.assertTrue(matches('/home/michael/othermatch'))
 		self.assertTrue(matches('/home/michael/#imnocomment'))
 
+	def test_ignore_directory(self):
+		matches = _parse_gitignore_string('.venv/', fake_base_dir='/home/michael')
+		self.assertTrue(matches('/home/michael/.venv'))
+		self.assertTrue(matches('/home/michael/.venv/folder'))
+		self.assertTrue(matches('/home/michael/.venv/file.txt'))
+
+	def test_ignore_directory_astrix(self):
+		matches = _parse_gitignore_string('.venv/*', fake_base_dir='/home/michael')
+		self.assertTrue(matches('/home/michael/.venv'))
+		self.assertTrue(matches('/home/michael/.venv/folder'))
+		self.assertTrue(matches('/home/michael/.venv/file.txt'))
+
 	def test_negation(self):
 		matches = _parse_gitignore_string(
 			'''
