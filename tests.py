@@ -1,3 +1,7 @@
+"""
+Run these tests with `python3 -m unittest`.
+"""
+
 from gitignore_parser import parse_gitignore
 from tempfile import NamedTemporaryFile
 import os
