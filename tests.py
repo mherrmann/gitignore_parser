@@ -1,11 +1,9 @@
-"""
-Run these tests with `python3 -m unittest`.
-"""
+from unittest.mock import patch, mock_open
 
 from gitignore_parser import parse_gitignore
-from tempfile import NamedTemporaryFile
-import os
+
 from unittest import TestCase
+
 
 class Test(TestCase):
 	def test_simple(self):
@@ -31,13 +29,8 @@ class Test(TestCase):
 		self.assertFalse(matches('/home/michael/keep.ignore'))
 		self.assertTrue(matches('/home/michael/waste.ignore'))
 
-def _parse_gitignore_string(s, fake_base_dir=None):
-	# The file returned by NamedTemporaryFile cannot be opened twice on Windows
-	# without closing it first. Create it, close it, then open it again.
-	# Manually delete when we're done.
-	tmp = NamedTemporaryFile('w', delete=False)
-	tmp.write(s)
-	tmp.close()
-	success = parse_gitignore(tmp.name, fake_base_dir)
-	os.unlink(tmp.name)
-	return success
+
+def _parse_gitignore_string(data: str, fake_base_dir: str = None):
+	with patch('builtins.open', mock_open(read_data=data)):
+		success = parse_gitignore(f'{fake_base_dir}/.gitignore', fake_base_dir)
+		return success
