@@ -90,6 +90,18 @@ def rule_from_pattern(pattern, base_path=None, source=None):
         # patterns with leading hashes are escaped with a backslash in front, unescape it
 	if pattern[0] == '\\' and pattern[1] == '#':
 		pattern = pattern[1:]
+        # trailing spaces are ignored unless they are escaped with a backslash
+	i = len(pattern)-1
+	striptrailingspaces = True
+	while i > 1 and pattern[i] == ' ':
+		if pattern[i-1] == '\\':
+			pattern = pattern[:i-1] + pattern[i:]
+			i = i - 1
+			striptrailingspaces = False
+		else:
+			if striptrailingspaces:
+				pattern = pattern[:i]
+		i = i - 1
 	regex = fnmatch_pathname_to_regex(pattern)
 	if anchored:
 		regex = ''.join(['^', regex])

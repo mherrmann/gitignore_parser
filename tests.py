@@ -40,6 +40,29 @@ class Test(TestCase):
 		self.assertTrue(matches('/home/michael/hello.c'))
 		self.assertFalse(matches('/home/michael/a/hello.java'))
 
+	def test_trailingspaces(self):
+		matches = _parse_gitignore_string(
+			'ignoretrailingspace \n'
+			'notignoredspace\\ \n'
+			'partiallyignoredspace\\  \n'
+			'partiallyignoredspace2 \\  \n'
+			'notignoredmultiplespace\\ \\ \\ ',
+			fake_base_dir='/home/michael'
+		)
+		self.assertTrue(matches('/home/michael/ignoretrailingspace'))
+		self.assertFalse(matches('/home/michael/ignoretrailingspace '))
+		self.assertTrue(matches('/home/michael/partiallyignoredspace '))
+		self.assertFalse(matches('/home/michael/partiallyignoredspace  '))
+		self.assertFalse(matches('/home/michael/partiallyignoredspace'))
+		self.assertTrue(matches('/home/michael/partiallyignoredspace2  '))
+		self.assertFalse(matches('/home/michael/partiallyignoredspace2   '))
+		self.assertFalse(matches('/home/michael/partiallyignoredspace2 '))
+		self.assertFalse(matches('/home/michael/partiallyignoredspace2'))
+		self.assertTrue(matches('/home/michael/notignoredspace '))
+		self.assertFalse(matches('/home/michael/notignoredspace'))
+		self.assertTrue(matches('/home/michael/notignoredmultiplespace   '))
+		self.assertFalse(matches('/home/michael/notignoredmultiplespace'))
+
 	def test_comment(self):
 		matches = _parse_gitignore_string(
                         'somematch\n'
