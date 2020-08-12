@@ -19,6 +19,27 @@ class Test(TestCase):
 		self.assertTrue(matches('/home/michael/dir/main.pyc'))
 		self.assertTrue(matches('/home/michael/__pycache__'))
 
+	def test_wildcard(self):
+		matches = _parse_gitignore_string(
+			'hello.*',
+			fake_base_dir='/home/michael'
+		)
+		self.assertTrue(matches('/home/michael/hello.txt'))
+		self.assertTrue(matches('/home/michael/hello.foobar/'))
+		self.assertTrue(matches('/home/michael/dir/hello.txt'))
+		self.assertTrue(matches('/home/michael/hello.'))
+		self.assertFalse(matches('/home/michael/hello'))
+		self.assertFalse(matches('/home/michael/helloX'))
+
+	def test_anchored_wildcard(self):
+		matches = _parse_gitignore_string(
+			'/hello.*',
+			fake_base_dir='/home/michael'
+		)
+		self.assertTrue(matches('/home/michael/hello.txt'))
+		self.assertTrue(matches('/home/michael/hello.c'))
+		self.assertFalse(matches('/home/michael/a/hello.java'))
+
 	def test_negation(self):
 		matches = _parse_gitignore_string(
 			'''
