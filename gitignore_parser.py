@@ -87,6 +87,9 @@ def rule_from_pattern(pattern, base_path=None, source=None):
 		pattern = pattern[1:]
 	if pattern[-1] == '/':
 		pattern = pattern[:-1]
+        # patterns with leading hashes are escaped with a backslash in front, unescape it
+	if pattern[0] == '\\' and pattern[1] == '#':
+		pattern = pattern[1:]
 	regex = fnmatch_pathname_to_regex(pattern)
 	if anchored:
 		regex = ''.join(['^', regex])

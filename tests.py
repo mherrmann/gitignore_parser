@@ -40,6 +40,19 @@ class Test(TestCase):
 		self.assertTrue(matches('/home/michael/hello.c'))
 		self.assertFalse(matches('/home/michael/a/hello.java'))
 
+	def test_comment(self):
+		matches = _parse_gitignore_string(
+                        'somematch\n'
+                        '#realcomment\n'
+                        'othermatch\n'
+                        '\\#imnocomment',
+			fake_base_dir='/home/michael'
+		)
+		self.assertTrue(matches('/home/michael/somematch'))
+		self.assertFalse(matches('/home/michael/#realcomment'))
+		self.assertTrue(matches('/home/michael/othermatch'))
+		self.assertTrue(matches('/home/michael/#imnocomment'))
+
 	def test_negation(self):
 		matches = _parse_gitignore_string(
 			'''
