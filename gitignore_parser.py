@@ -5,6 +5,7 @@ import re
 from os.path import dirname
 from pathlib import Path
 
+
 def handle_negation(file_path, rules):
     matched = False
     for rule in rules:
@@ -14,6 +15,7 @@ def handle_negation(file_path, rules):
             else:
                 matched = True
     return matched
+
 
 def parse_gitignore(full_path, base_dir=None):
     if base_dir is None:
@@ -34,6 +36,7 @@ def parse_gitignore(full_path, base_dir=None):
         # We have negation rules. We can't use a simple "any" to evaluate them.
         # Later rules override earlier rules.
         return lambda file_path: handle_negation(file_path, rules)
+
 
 def rule_from_pattern(pattern, base_path=None, source=None):
     """
@@ -99,6 +102,7 @@ def rule_from_pattern(pattern, base_path=None, source=None):
         base_path=Path(base_path) if base_path else None,
         source=source
     )
+
 
 whitespace_re = re.compile(r'(\\ )+$')
 
