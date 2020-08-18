@@ -98,7 +98,7 @@ class Test(TestCase):
         self.assertFalse(matches('/home/michael/keep.ignore'))
         self.assertTrue(matches('/home/michael/waste.ignore'))
 
-    def test_single_asterisks(self):
+    def test_single_asterisk(self):
         matches = _parse_gitignore_string('*', fake_base_dir='/home/michael')
         self.assertTrue(matches('/home/michael/file.txt'))
         self.assertTrue(matches('/home/michael/directory'))
