@@ -98,6 +98,13 @@ class Test(TestCase):
         self.assertFalse(matches('/home/michael/keep.ignore'))
         self.assertTrue(matches('/home/michael/waste.ignore'))
 
+
+    def test_double_asterisks(self):
+        matches = _parse_gitignore_string('foo/**/Bar', fake_base_dir='/home/michael')
+        self.assertTrue(matches('/home/michael/foo/hello/Bar'))
+        self.assertTrue(matches('/home/michael/foo/world/Bar'))
+        self.assertTrue(matches('/home/michael/foo/Bar'))
+
     def test_single_asterisk(self):
         matches = _parse_gitignore_string('*', fake_base_dir='/home/michael')
         self.assertTrue(matches('/home/michael/file.txt'))
