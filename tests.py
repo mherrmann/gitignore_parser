@@ -80,7 +80,7 @@ class Test(TestCase):
         self.assertTrue(matches('/home/michael/.venv/folder'))
         self.assertTrue(matches('/home/michael/.venv/file.txt'))
 
-    def test_ignore_directory_astrix(self):
+    def test_ignore_directory_asterisk(self):
         matches = _parse_gitignore_string('.venv/*', fake_base_dir='/home/michael')
         self.assertFalse(matches('/home/michael/.venv'))
         self.assertTrue(matches('/home/michael/.venv/folder'))
@@ -98,11 +98,18 @@ class Test(TestCase):
         self.assertFalse(matches('/home/michael/keep.ignore'))
         self.assertTrue(matches('/home/michael/waste.ignore'))
 
+
     def test_double_asterisks(self):
         matches = _parse_gitignore_string('foo/**/Bar', fake_base_dir='/home/michael')
         self.assertTrue(matches('/home/michael/foo/hello/Bar'))
         self.assertTrue(matches('/home/michael/foo/world/Bar'))
         self.assertTrue(matches('/home/michael/foo/Bar'))
+
+    def test_single_asterisk(self):
+        matches = _parse_gitignore_string('*', fake_base_dir='/home/michael')
+        self.assertTrue(matches('/home/michael/file.txt'))
+        self.assertTrue(matches('/home/michael/directory'))
+        self.assertTrue(matches('/home/michael/directory-trailing/'))
 
 
 def _parse_gitignore_string(data: str, fake_base_dir: str = None):
