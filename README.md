@@ -35,6 +35,13 @@ I couldn't find a good library for doing the above on PyPI. There are
 several other libraries, but they don't seem to support all features,
 be it the square brackets in `*.py[cod]` or top-level paths `/...`.
 
+## Contributing
+
+I'm very open to merging PRs. But before you start working on one, please
+read through my
+[guidelines for PRs](https://gist.github.com/mherrmann/5ce21814789152c17abd91c0b3eaadca).
+It will save us both time and unnecessary effort.
+
 ## Attribution
 
 The implementation is based on https://github.com/snark/ignorance/ by
