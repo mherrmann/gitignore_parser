@@ -114,5 +114,5 @@ class Test(TestCase):
 
 def _parse_gitignore_string(data: str, fake_base_dir: str = None):
     with patch('builtins.open', mock_open(read_data=data)):
-        success = parse_gitignore(f'{fake_base_dir}/.gitignore', fake_base_dir)
+        success = parse_gitignore(fake_base_dir, '.gitignore')
         return success

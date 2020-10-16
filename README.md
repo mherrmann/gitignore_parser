@@ -19,7 +19,7 @@ Suppose `/home/michael/project/.gitignore` contains the following:
 Then:
 
     >>> from gitignore_parser import parse_gitignore
-    >>> matches = parse_gitignore('/home/michael/project/.gitignore')
+    >>> matches = parse_gitignore(base_dir='/home/michael/project', filename=".gitignore")
     >>> matches('/home/michael/project/main.py')
     False
     >>> matches('/home/michael/project/main.pyc')
