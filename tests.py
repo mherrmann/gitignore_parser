@@ -111,6 +111,20 @@ class Test(TestCase):
         self.assertTrue(matches('/home/michael/directory'))
         self.assertTrue(matches('/home/michael/directory-trailing/'))
 
+    def test_spurious_matches(self):
+        matches = _parse_gitignore_string('abc', fake_base_dir='/home/michael')
+        self.assertFalse(matches('/home/michael/abc.txt'))
+        self.assertFalse(matches('/home/michael/file-abc.txt'))
+        self.assertFalse(matches('/home/michael/fileabc'))
+        self.assertFalse(matches('/home/michael/directoryabc/'))
+        self.assertFalse(matches('/home/michael/directoryabc-trailing'))
+        self.assertFalse(matches('/home/michael/directoryabc-trailing/'))
+        self.assertFalse(matches('/home/michael/abc-suffixed/file.txt'))
+        self.assertFalse(matches('/home/michael/subdir/abc.txt'))
+        self.assertFalse(matches('/home/michael/subdir/directoryabc'))
+        self.assertFalse(matches('/home/michael/subdir/directory-abc-trailing/'))
+        self.assertFalse(matches('/home/michael/subdir/directory-abc-trailing/file.txt'))
+
 
 def _parse_gitignore_string(data: str, fake_base_dir: str = None):
     with patch('builtins.open', mock_open(read_data=data)):
