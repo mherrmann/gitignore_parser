@@ -107,7 +107,7 @@ def rule_from_pattern(pattern, base_path=None, source=None):
         regex = ''.join(['^', regex])
     return IgnoreRule(
         pattern=orig_pattern,
-        regex=regex,
+        regex=re.compile(regex),
         negation=negation,
         directory_only=directory_only,
         anchored=anchored,
