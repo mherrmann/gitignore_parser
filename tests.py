@@ -111,13 +111,6 @@ class Test(TestCase):
         self.assertTrue(matches('/home/michael/directory'))
         self.assertTrue(matches('/home/michael/directory-trailing/'))
 
-    def test_ignore_all_subdirectories(self):
-        matches = _parse_gitignore_string('**/', fake_base_dir='/home/michael')
-        self.assertFalse(matches('/home/michael/file.txt'))
-        self.assertTrue(matches('/home/michael/directory/'))
-        self.assertTrue(matches('/home/michael/directory/file.txt'))
-        self.assertTrue(matches('/home/michael/directory/subdirectory/'))
-
 
 def _parse_gitignore_string(data: str, fake_base_dir: str = None):
     with patch('builtins.open', mock_open(read_data=data)):

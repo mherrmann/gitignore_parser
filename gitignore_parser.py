@@ -78,17 +78,17 @@ def rule_from_pattern(pattern, base_path=None, source=None):
     # A slash is a sign that we're tied to the base_path of our rule
     # set.
     anchored = '/' in pattern[:-1]
-    if pattern[:1] == '/':
+    if pattern[0] == '/':
         pattern = pattern[1:]
-    if pattern[:2] == '**':
+    if pattern[0] == '*' and len(pattern) >= 2 and pattern[1] == '*':
         pattern = pattern[2:]
         anchored = False
-    if pattern[:1] == '/':
+    if pattern[0] == '/':
         pattern = pattern[1:]
-    if pattern[-1:] == '/':
+    if pattern[-1] == '/':
         pattern = pattern[:-1]
     # patterns with leading hashes are escaped with a backslash in front, unescape it
-    if pattern[:2] == '\\#':
+    if pattern[0] == '\\' and pattern[1] == '#':
         pattern = pattern[1:]
     # trailing spaces are ignored unless they are escaped with a backslash
     i = len(pattern)-1
