@@ -102,7 +102,7 @@ def rule_from_pattern(pattern, base_path=None, source=None):
             if striptrailingspaces:
                 pattern = pattern[:i]
         i = i - 1
-    regex = fnmatch_pathname_to_regex(pattern, directory_only)
+    regex = fnmatch_pathname_to_regex(pattern, directory_only, negation)
     if anchored:
         regex = ''.join(['^', regex])
     return IgnoreRule(
@@ -138,6 +138,10 @@ class IgnoreRule(collections.namedtuple('IgnoreRule_', IGNORE_RULE_FIELDS)):
             rel_path = str(Path(abs_path).resolve().relative_to(self.base_path))
         else:
             rel_path = str(Path(abs_path))
+        # Path() strips the trailing slash, so we need to preserver it
+        # in case of directory-only negation
+        if self.negation and abs_path[-1] == '/':
+            rel_path += '/'
         if rel_path.startswith('./'):
             rel_path = rel_path[2:]
         if re.search(self.regex, rel_path):
@@ -147,7 +151,7 @@ class IgnoreRule(collections.namedtuple('IgnoreRule_', IGNORE_RULE_FIELDS)):
 
 # Frustratingly, python's fnmatch doesn't provide the FNM_PATHNAME
 # option that .gitignore's behavior depends on.
-def fnmatch_pathname_to_regex(pattern, directory_only: bool):
+def fnmatch_pathname_to_regex(pattern, directory_only: bool, negation: bool):
     """
     Implements fnmatch style-behavior, as though with FNM_PATHNAME flagged;
     the path separator will not match shell-style '*' and '.' wildcards.
@@ -203,4 +207,6 @@ def fnmatch_pathname_to_regex(pattern, directory_only: bool):
     res.insert(0, '(?ms)')
     if not directory_only:
         res.append('$')
+    if directory_only and negation:
+        res.append('/$')
     return ''.join(res)

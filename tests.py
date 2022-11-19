@@ -105,6 +105,22 @@ class Test(TestCase):
         self.assertTrue(matches('/home/michael/foo/world/Bar'))
         self.assertTrue(matches('/home/michael/foo/Bar'))
 
+    def test_directory_only_negation(self):
+        matches = _parse_gitignore_string('''
+data/**
+!data/**/
+!.gitkeep
+!data/01_raw/*
+            ''',
+            fake_base_dir='/home/michael'
+        )
+        self.assertFalse(matches('/home/michael/data/01_raw/'))
+        self.assertFalse(matches('/home/michael/data/01_raw/.gitkeep'))
+        self.assertFalse(matches('/home/michael/data/01_raw/raw_file.csv'))
+        self.assertFalse(matches('/home/michael/data/02_processed/'))
+        self.assertFalse(matches('/home/michael/data/02_processed/.gitkeep'))
+        self.assertTrue(matches('/home/michael/data/02_processed/processed_file.csv'))
+
     def test_single_asterisk(self):
         matches = _parse_gitignore_string('*', fake_base_dir='/home/michael')
         self.assertTrue(matches('/home/michael/file.txt'))
