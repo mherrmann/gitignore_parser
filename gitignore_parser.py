@@ -4,6 +4,7 @@ import re
 
 from os.path import dirname
 from pathlib import Path
+from typing import Union
 
 def handle_negation(file_path, rules):
     matched = False
@@ -132,7 +133,7 @@ class IgnoreRule(collections.namedtuple('IgnoreRule_', IGNORE_RULE_FIELDS)):
     def __repr__(self):
         return ''.join(['IgnoreRule(\'', self.pattern, '\')'])
 
-    def match(self, abs_path):
+    def match(self, abs_path: Union[str, Path]):
         matched = False
         if self.base_path:
             rel_path = str(Path(abs_path).resolve().relative_to(self.base_path))
@@ -140,7 +141,7 @@ class IgnoreRule(collections.namedtuple('IgnoreRule_', IGNORE_RULE_FIELDS)):
             rel_path = str(Path(abs_path))
         # Path() strips the trailing slash, so we need to preserve it
         # in case of directory-only negation
-        if self.negation and abs_path[-1] == '/':
+        if self.negation and type(abs_path) == str and abs_path[-1] == '/':
             rel_path += '/'
         if rel_path.startswith('./'):
             rel_path = rel_path[2:]
