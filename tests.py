@@ -1,4 +1,5 @@
 from unittest.mock import patch, mock_open
+from pathlib import Path
 
 from gitignore_parser import parse_gitignore
 
@@ -127,6 +128,10 @@ data/**
         self.assertTrue(matches('/home/michael/directory'))
         self.assertTrue(matches('/home/michael/directory-trailing/'))
 
+    def test_supports_path_type_argument(self):
+        matches = _parse_gitignore_string('file1\n!file2', fake_base_dir='/home/michael')
+        self.assertTrue(matches(Path('/home/michael/file1')))
+        self.assertFalse(matches(Path('/home/michael/file2')))
 
 def _parse_gitignore_string(data: str, fake_base_dir: str = None):
     with patch('builtins.open', mock_open(read_data=data)):
