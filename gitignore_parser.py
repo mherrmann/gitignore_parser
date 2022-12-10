@@ -1,12 +1,55 @@
-import collections
 import os
 import re
 
+from dataclasses import dataclass
 from os.path import dirname
 from pathlib import Path
-from typing import Union
+from typing import Callable, Iterable, List, Optional, Union
 
-def handle_negation(file_path, rules):
+# TODO: Theoretically, a path can also be bytes, so a better definition is
+#
+# from typing import AnyStr
+# PathType = Union[AnyStr, os.PathLike[AnyStr]]
+#
+# but this requires all the functions in this module to support bytes input.
+PathType = Union[str, os.PathLike[str]]
+
+
+@dataclass
+class IgnoreRule:
+    pattern: str
+    regex: str
+    negation: bool
+    directory_only: bool
+    anchored: bool
+    base_path: Optional[PathType]
+    source: Optional[PathType]
+
+    def __str__(self) -> str:
+        return self.pattern
+
+    def __repr__(self) -> str:
+        return ''.join(['IgnoreRule(\'', self.pattern, '\')'])
+
+    def match(self, abs_path: PathType) -> bool:
+        matched = False
+        if self.base_path:
+            rel_path = str(
+                Path(abs_path).resolve().relative_to(self.base_path))
+        else:
+            rel_path = str(Path(abs_path))
+        # Path() strips the trailing slash, so we need to preserve it
+        # in case of directory-only negation
+        if self.negation and type(abs_path) == str and abs_path[-1] == '/':
+            rel_path += '/'
+        if rel_path.startswith('./'):
+            rel_path = rel_path[2:]
+        if re.search(self.regex, rel_path):
+            matched = True
+        return matched
+
+
+def handle_negation(file_path: PathType, rules: Iterable[IgnoreRule]) -> bool:
     matched = False
     for rule in rules:
         if rule.match(file_path):
@@ -16,10 +59,11 @@ def handle_negation(file_path, rules):
                 matched = True
     return matched
 
-def parse_gitignore(full_path, base_dir=None):
+
+def parse_gitignore(full_path: PathType, base_dir: Optional[PathType] = None) -> Callable[[PathType], bool]:
     if base_dir is None:
         base_dir = dirname(full_path)
-    rules = []
+    rules: List[IgnoreRule] = []
     with open(full_path) as ignore_file:
         counter = 0
         for line in ignore_file:
@@ -36,7 +80,11 @@ def parse_gitignore(full_path, base_dir=None):
         # Later rules override earlier rules.
         return lambda file_path: handle_negation(file_path, rules)
 
-def rule_from_pattern(pattern, base_path=None, source=None):
+
+whitespace_re = re.compile(r'(\\ )+$')
+
+
+def rule_from_pattern(pattern: str, base_path: Optional[PathType] = None, source: Optional[PathType] = None) -> IgnoreRule:
     """
     Take a .gitignore match pattern, such as "*.py[cod]" or "**/*.bak",
     and return an IgnoreRule suitable for matching against files and
@@ -116,49 +164,16 @@ def rule_from_pattern(pattern, base_path=None, source=None):
         source=source
     )
 
-whitespace_re = re.compile(r'(\\ )+$')
-
-IGNORE_RULE_FIELDS = [
-    'pattern', 'regex',  # Basic values
-    'negation', 'directory_only', 'anchored',  # Behavior flags
-    'base_path',  # Meaningful for gitignore-style behavior
-    'source'  # (file, line) tuple for reporting
-]
-
-
-class IgnoreRule(collections.namedtuple('IgnoreRule_', IGNORE_RULE_FIELDS)):
-    def __str__(self):
-        return self.pattern
-
-    def __repr__(self):
-        return ''.join(['IgnoreRule(\'', self.pattern, '\')'])
-
-    def match(self, abs_path: Union[str, Path]):
-        matched = False
-        if self.base_path:
-            rel_path = str(Path(abs_path).resolve().relative_to(self.base_path))
-        else:
-            rel_path = str(Path(abs_path))
-        # Path() strips the trailing slash, so we need to preserve it
-        # in case of directory-only negation
-        if self.negation and type(abs_path) == str and abs_path[-1] == '/':
-            rel_path += '/'
-        if rel_path.startswith('./'):
-            rel_path = rel_path[2:]
-        if re.search(self.regex, rel_path):
-            matched = True
-        return matched
-
 
 # Frustratingly, python's fnmatch doesn't provide the FNM_PATHNAME
 # option that .gitignore's behavior depends on.
-def fnmatch_pathname_to_regex(pattern, directory_only: bool, negation: bool):
+def fnmatch_pathname_to_regex(pattern: str, directory_only: bool, negation: bool) -> str:
     """
     Implements fnmatch style-behavior, as though with FNM_PATHNAME flagged;
     the path separator will not match shell-style '*' and '.' wildcards.
     """
     i, n = 0, len(pattern)
-    
+
     seps = [re.escape(os.sep)]
     if os.altsep is not None:
         seps.append(re.escape(os.altsep))
