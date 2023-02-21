@@ -103,9 +103,9 @@ def rule_from_pattern(pattern, base_path=None, source=None):
             if striptrailingspaces:
                 pattern = pattern[:i]
         i = i - 1
-    regex = fnmatch_pathname_to_regex(pattern, directory_only, negation)
-    if anchored:
-        regex = ''.join(['^', regex])
+    regex = fnmatch_pathname_to_regex(
+        pattern, directory_only, negation, anchored=bool(anchored)
+    )
     return IgnoreRule(
         pattern=orig_pattern,
         regex=regex,
@@ -152,13 +152,15 @@ class IgnoreRule(collections.namedtuple('IgnoreRule_', IGNORE_RULE_FIELDS)):
 
 # Frustratingly, python's fnmatch doesn't provide the FNM_PATHNAME
 # option that .gitignore's behavior depends on.
-def fnmatch_pathname_to_regex(pattern, directory_only: bool, negation: bool):
+def fnmatch_pathname_to_regex(
+    pattern, directory_only: bool, negation: bool, anchored: bool = False
+):
     """
     Implements fnmatch style-behavior, as though with FNM_PATHNAME flagged;
     the path separator will not match shell-style '*' and '.' wildcards.
     """
     i, n = 0, len(pattern)
-    
+
     seps = [re.escape(os.sep)]
     if os.altsep is not None:
         seps.append(re.escape(os.altsep))
@@ -205,6 +207,8 @@ def fnmatch_pathname_to_regex(pattern, directory_only: bool, negation: bool):
                 res.append('[{}]'.format(stuff))
         else:
             res.append(re.escape(c))
+    if anchored:
+        res.insert(0, '^')
     res.insert(0, '(?ms)')
     if not directory_only:
         res.append('$')
