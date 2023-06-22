@@ -3,7 +3,7 @@ from pathlib import Path
 
 from gitignore_parser import parse_gitignore
 
-from unittest import TestCase
+from unittest import TestCase, main
 
 
 class Test(TestCase):
@@ -80,6 +80,7 @@ class Test(TestCase):
         self.assertTrue(matches('/home/michael/.venv'))
         self.assertTrue(matches('/home/michael/.venv/folder'))
         self.assertTrue(matches('/home/michael/.venv/file.txt'))
+        self.assertFalse(matches('/home/michael/.venv_no_folder'))
 
     def test_ignore_directory_asterisk(self):
         matches = _parse_gitignore_string('.venv/*', fake_base_dir='/home/michael')
@@ -137,3 +138,6 @@ def _parse_gitignore_string(data: str, fake_base_dir: str = None):
     with patch('builtins.open', mock_open(read_data=data)):
         success = parse_gitignore(f'{fake_base_dir}/.gitignore', fake_base_dir)
         return success
+
+if __name__ == '__main__':
+    main()
