@@ -80,7 +80,8 @@ class Test(TestCase):
         self.assertTrue(matches('/home/michael/.venv'))
         self.assertTrue(matches('/home/michael/.venv/folder'))
         self.assertTrue(matches('/home/michael/.venv/file.txt'))
-        self.assertFalse(matches('/home/michael/.venv_no_folder'))
+        self.assertFalse(matches('/home/michael/.venv_other_folder'))
+        self.assertFalse(matches('/home/michael/.venv_no_folder.py'))
 
     def test_ignore_directory_asterisk(self):
         matches = _parse_gitignore_string('.venv/*', fake_base_dir='/home/michael')
