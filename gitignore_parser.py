@@ -212,6 +212,8 @@ def fnmatch_pathname_to_regex(
     res.insert(0, '(?ms)')
     if not directory_only:
         res.append('$')
-    if directory_only and negation:
+    elif directory_only and negation:
         res.append('/$')
+    else:
+        res.append('($|\/)')
     return ''.join(res)
