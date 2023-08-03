@@ -4,17 +4,13 @@ import re
 
 from os.path import dirname
 from pathlib import Path
-from typing import Union
+from typing import Reversible, Union
 
-def handle_negation(file_path, rules):
-    matched = False
-    for rule in rules:
+def handle_negation(file_path, rules: Reversible["IgnoreRule"]):
+    for rule in reversed(rules):
         if rule.match(file_path):
-            if rule.negation:
-                matched = False
-            else:
-                matched = True
-    return matched
+            return not rule.negation
+    return False
 
 def parse_gitignore(full_path, base_dir=None):
     if base_dir is None:
