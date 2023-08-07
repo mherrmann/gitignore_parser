@@ -10,7 +10,6 @@ description = 'A spec-compliant gitignore parser for Python 3.5+'
 setup(
     name='gitignore_parser',
     version='0.1.5',
-    install_requires=["pathlib; python_version < '3.0'"],
     description=description,
     long_description=
         description + '\n\nhttps://github.com/mherrmann/gitignore_parser',
@@ -21,11 +20,11 @@ setup(
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
-    
+
         'License :: OSI Approved :: MIT License',
-    
+
         'Operating System :: OS Independent',
-    
+
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
