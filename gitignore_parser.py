@@ -112,7 +112,6 @@ def rule_from_pattern(pattern, base_path=None, source=None):
         source=source
     )
 
-whitespace_re = re.compile(r'(\\ )+$')
 
 IGNORE_RULE_FIELDS = [
     'pattern', 'regex',  # Basic values
