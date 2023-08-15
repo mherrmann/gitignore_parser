@@ -204,7 +204,6 @@ def fnmatch_pathname_to_regex(
             res.append(re.escape(c))
     if anchored:
         res.insert(0, '^')
-    res.insert(0, '(?ms)')
     if not directory_only:
         res.append('$')
     elif directory_only and negation:
