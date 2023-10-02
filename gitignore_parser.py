@@ -84,8 +84,9 @@ def rule_from_pattern(pattern, base_path=None, source=None):
         pattern = pattern[1:]
     if pattern[-1] == '/':
         pattern = pattern[:-1]
-    # patterns with leading hashes are escaped with a backslash in front, unescape it
-    if pattern[0] == '\\' and pattern[1] == '#':
+    # patterns with leading hashes or exclamation marks are escaped with a
+    # backslash in front, unescape it
+    if pattern[0] == '\\' and pattern[1] in ('#', '!'):
         pattern = pattern[1:]
     # trailing spaces are ignored unless they are escaped with a backslash
     i = len(pattern)-1
