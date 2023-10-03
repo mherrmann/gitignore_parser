@@ -124,6 +124,14 @@ class Test(TestCase):
         self.assertFalse(matches('/home/michael/a/bb/cc/d'))
         self.assertFalse(matches('/home/michael/a/bb/XX/cc/d'))
 
+    def test_more_asterisks_handled_like_single_asterisk(self):
+        matches = _parse_gitignore_string('***a/b', fake_base_dir='/home/michael')
+        self.assertTrue(matches('/home/michael/XYZa/b'))
+        self.assertFalse(matches('/home/michael/foo/a/b'))
+        matches = _parse_gitignore_string('a/b***', fake_base_dir='/home/michael')
+        self.assertTrue(matches('/home/michael/a/bXYZ'))
+        self.assertFalse(matches('/home/michael/a/b/foo'))
+
     def test_directory_only_negation(self):
         matches = _parse_gitignore_string('''
 data/**

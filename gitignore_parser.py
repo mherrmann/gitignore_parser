@@ -49,19 +49,16 @@ def rule_from_pattern(pattern, base_path=None, source=None):
     # Discard comments and separators
     if pattern.strip() == '' or pattern[0] == '#':
         return
-    # Discard anything with more than two consecutive asterisks
-    if pattern.find('***') > -1:
-        return
     # Strip leading bang before examining double asterisks
     if pattern[0] == '!':
         negation = True
         pattern = pattern[1:]
     else:
         negation = False
-    # Double-asterisks not surrounded by slashes (or at the start/end) should
-    # be treated like single-asterisks
-    pattern = re.sub(r'([^/])\*\*', r'\1*', pattern)
-    pattern = re.sub(r'\*\*([^/])', r'*\1', pattern)
+    # Multi-asterisks not surrounded by slashes (or at the start/end) should
+    # be treated like single-asterisks.
+    pattern = re.sub(r'([^/])\*{2,}', r'\1*', pattern)
+    pattern = re.sub(r'\*{2,}([^/])', r'*\1', pattern)
 
     # Special-casing '/', which doesn't match any files or directories
     if pattern.rstrip() == '/':
