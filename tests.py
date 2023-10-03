@@ -101,6 +101,11 @@ class Test(TestCase):
         self.assertFalse(matches('/home/michael/keep.ignore'))
         self.assertTrue(matches('/home/michael/waste.ignore'))
 
+    def test_literal_exclamation_mark(self):
+        matches = _parse_gitignore_string('\\!ignore_me!', fake_base_dir='/home/michael')
+        self.assertTrue(matches('/home/michael/!ignore_me!'))
+        self.assertFalse(matches('/home/michael/ignore_me!'))
+        self.assertFalse(matches('/home/michael/ignore_me'))
 
     def test_double_asterisks(self):
         matches = _parse_gitignore_string('foo/**/Bar', fake_base_dir='/home/michael')
