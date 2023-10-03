@@ -58,14 +58,10 @@ def rule_from_pattern(pattern, base_path=None, source=None):
         pattern = pattern[1:]
     else:
         negation = False
-    # Discard anything with invalid double-asterisks -- they can appear
-    # at the start or the end, or be surrounded by slashes
-    for m in re.finditer(r'\*\*', pattern):
-        start_index = m.start()
-        if (start_index != 0 and start_index != len(pattern) - 2 and
-                (pattern[start_index - 1] != '/' or
-                 pattern[start_index + 2] != '/')):
-            return
+    # Double-asterisks not surrounded by slashes (or at the start/end) should
+    # be treated like single-asterisks
+    pattern = re.sub(r'([^/])\*\*', r'\1*', pattern)
+    pattern = re.sub(r'\*\*([^/])', r'*\1', pattern)
 
     # Special-casing '/', which doesn't match any files or directories
     if pattern.rstrip() == '/':
