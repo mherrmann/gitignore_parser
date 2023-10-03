@@ -135,6 +135,15 @@ data/**
         self.assertTrue(matches(Path('/home/michael/file1')))
         self.assertFalse(matches(Path('/home/michael/file2')))
 
+    def test_slash_in_range_does_not_match_dirs(self):
+        matches = _parse_gitignore_string('abc[X-Z/]def', fake_base_dir='/home/michael')
+        self.assertFalse(matches('/home/michael/abcdef'))
+        self.assertTrue(matches('/home/michael/abcXdef'))
+        self.assertTrue(matches('/home/michael/abcYdef'))
+        self.assertTrue(matches('/home/michael/abcZdef'))
+        self.assertFalse(matches('/home/michael/abc/def'))
+        self.assertFalse(matches('/home/michael/abcXYZdef'))
+
 def _parse_gitignore_string(data: str, fake_base_dir: str = None):
     with patch('builtins.open', mock_open(read_data=data)):
         success = parse_gitignore(f'{fake_base_dir}/.gitignore', fake_base_dir)
