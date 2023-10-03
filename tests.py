@@ -112,6 +112,7 @@ class Test(TestCase):
         self.assertTrue(matches('/home/michael/foo/hello/Bar'))
         self.assertTrue(matches('/home/michael/foo/world/Bar'))
         self.assertTrue(matches('/home/michael/foo/Bar'))
+        self.assertFalse(matches('/home/michael/foo/BarBar'))
 
     def test_directory_only_negation(self):
         matches = _parse_gitignore_string('''
