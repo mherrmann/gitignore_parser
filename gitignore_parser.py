@@ -193,7 +193,7 @@ def fnmatch_pathname_to_regex(
             if j >= n:
                 res.append('\\[')
             else:
-                stuff = pattern[i:j].replace('\\', '\\\\')
+                stuff = pattern[i:j].replace('\\', '\\\\').replace('/', '')
                 i = j + 1
                 if stuff[0] == '!':
                     stuff = ''.join(['^', stuff[1:]])
