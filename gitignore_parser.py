@@ -205,6 +205,8 @@ def fnmatch_pathname_to_regex(
             res.append(re.escape(c))
     if anchored:
         res.insert(0, '^')
+    else:
+        res.insert(0, f"(^|{seps_group})")
     if not directory_only:
         res.append('$')
     elif directory_only and negation:

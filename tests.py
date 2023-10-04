@@ -18,6 +18,15 @@ class Test(TestCase):
         self.assertTrue(matches('/home/michael/dir/main.pyc'))
         self.assertTrue(matches('/home/michael/__pycache__'))
 
+    def test_incomplete_filename(self):
+        matches = _parse_gitignore_string('o.py', fake_base_dir='/home/michael')
+        self.assertTrue(matches('/home/michael/o.py'))
+        self.assertFalse(matches('/home/michael/foo.py'))
+        self.assertFalse(matches('/home/michael/o.pyc'))
+        self.assertTrue(matches('/home/michael/dir/o.py'))
+        self.assertFalse(matches('/home/michael/dir/foo.py'))
+        self.assertFalse(matches('/home/michael/dir/o.pyc'))
+
     def test_wildcard(self):
         matches = _parse_gitignore_string(
             'hello.*',
