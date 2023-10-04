@@ -164,10 +164,11 @@ def fnmatch_pathname_to_regex(
             try:
                 if pattern[i] == '*':
                     i += 1
-                    res.append('.*')
-                    if pattern[i] == '/':
+                    if i < n and pattern[i] == '/':
                         i += 1
-                        res.append(''.join([seps_group, '?']))
+                        res.append(''.join(['(.*', seps_group, ')?']))
+                    else:
+                        res.append('.*')
                 else:
                     res.append(''.join([nonsep, '*']))
             except IndexError:

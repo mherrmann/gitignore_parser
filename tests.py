@@ -121,6 +121,7 @@ class Test(TestCase):
         self.assertTrue(matches('/home/michael/foo/hello/Bar'))
         self.assertTrue(matches('/home/michael/foo/world/Bar'))
         self.assertTrue(matches('/home/michael/foo/Bar'))
+        self.assertFalse(matches('/home/michael/foo/BarBar'))
 
     def test_double_asterisk_without_slashes_handled_like_single_asterisk(self):
         matches = _parse_gitignore_string('a/b**c/d', fake_base_dir='/home/michael')
