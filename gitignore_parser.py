@@ -2,7 +2,7 @@ import collections
 import os
 import re
 
-from os.path import dirname
+from os.path import abspath, dirname
 from pathlib import Path
 from typing import Reversible, Union
 
@@ -102,7 +102,7 @@ def rule_from_pattern(pattern, base_path=None, source=None):
         negation=negation,
         directory_only=directory_only,
         anchored=anchored,
-        base_path=Path(base_path) if base_path else None,
+        base_path=_normalize_path(base_path) if base_path else None,
         source=source
     )
 
@@ -125,9 +125,9 @@ class IgnoreRule(collections.namedtuple('IgnoreRule_', IGNORE_RULE_FIELDS)):
     def match(self, abs_path: Union[str, Path]):
         matched = False
         if self.base_path:
-            rel_path = str(Path(abs_path).resolve().relative_to(self.base_path))
+            rel_path = str(_normalize_path(abs_path).relative_to(self.base_path))
         else:
-            rel_path = str(Path(abs_path))
+            rel_path = str(_normalize_path(abs_path))
         # Path() strips the trailing slash, so we need to preserve it
         # in case of directory-only negation
         if self.negation and type(abs_path) == str and abs_path[-1] == '/':
@@ -208,3 +208,13 @@ def fnmatch_pathname_to_regex(
     else:
         res.append('($|\\/)')
     return ''.join(res)
+
+
+def _normalize_path(path: Union[str, Path]) -> Path:
+    """Normalize a path without resolving symlinks.
+
+    This is equivalent to `Path.resolve()` except that it does not resolve symlinks.
+    Note that this simplifies paths by removing double slashes, `..`, `.` etc. like
+    `Path.resolve()` does.
+    """
+    return Path(abspath(path))

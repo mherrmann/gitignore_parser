@@ -1,5 +1,6 @@
 from unittest.mock import patch, mock_open
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from gitignore_parser import parse_gitignore
 
@@ -177,6 +178,28 @@ data/**
         self.assertTrue(matches('/home/michael/abcZdef'))
         self.assertFalse(matches('/home/michael/abc/def'))
         self.assertFalse(matches('/home/michael/abcXYZdef'))
+
+    def test_symlink_to_another_directory(self):
+        """Test the behavior of a symlink to another directory.
+
+        The issue https://github.com/mherrmann/gitignore_parser/issues/29 describes how
+        a symlink to another directory caused an exception to be raised during matching.
+
+        This test ensures that the issue is now fixed.
+        """
+        with TemporaryDirectory() as project_dir, TemporaryDirectory() as another_dir:
+            matches = _parse_gitignore_string('link', fake_base_dir=project_dir)
+
+            # Create a symlink to another directory.
+            link = Path(project_dir, 'link')
+            target = Path(another_dir, 'target')
+            link.symlink_to(target)
+
+            # Check the intended behavior according to
+            # https://git-scm.com/docs/gitignore#_notes:
+            # Symbolic links are not followed and are matched as if they were regular
+            # files.
+            self.assertTrue(matches(link))
 
 def _parse_gitignore_string(data: str, fake_base_dir: str = None):
     with patch('builtins.open', mock_open(read_data=data)):
