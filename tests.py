@@ -4,7 +4,7 @@ from tempfile import TemporaryDirectory
 
 from gitignore_parser import parse_gitignore
 
-from unittest import TestCase, main
+from unittest import TestCase, main, SkipTest
 
 
 class Test(TestCase):
@@ -195,8 +195,12 @@ data/**
             # Create a symlink to another directory.
             link = project_dir / 'link'
             target = another_dir / 'target'
-            link.symlink_to(target)
-
+            
+            try:
+                link.symlink_to(target)
+            except OSError:
+                e = "Current User does not have permissions to perform symlink/"
+                raise SkipTest(e)
             # Check the intended behavior according to
             # https://git-scm.com/docs/gitignore#_notes:
             # Symbolic links are not followed and are matched as if they were regular
