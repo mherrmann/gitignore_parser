@@ -199,7 +199,7 @@ data/**
             try:
                 link.symlink_to(target)
             except OSError:
-                e = "Current User does not have permissions to perform symlink/"
+                e = "Current user does not have permissions to perform symlink."
                 raise SkipTest(e)
             # Check the intended behavior according to
             # https://git-scm.com/docs/gitignore#_notes:
