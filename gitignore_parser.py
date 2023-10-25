@@ -4,6 +4,7 @@ import re
 
 from os.path import abspath, dirname
 from pathlib import Path
+import sys
 from typing import Reversible, Union
 
 def handle_negation(file_path, rules: Reversible["IgnoreRule"]):
@@ -128,6 +129,10 @@ class IgnoreRule(collections.namedtuple('IgnoreRule_', IGNORE_RULE_FIELDS)):
             rel_path = str(_normalize_path(abs_path).relative_to(self.base_path))
         else:
             rel_path = str(_normalize_path(abs_path))
+        # Path() strips the trailing whitespace on windows, so we need to
+        # preserve it.
+        if sys.platform.startswith('win'):
+            rel_path += ' ' * _count_trailing_whitespace(abs_path)
         # Path() strips the trailing slash, so we need to preserve it
         # in case of directory-only negation
         if self.negation and type(abs_path) == str and abs_path[-1] == '/':
@@ -218,3 +223,14 @@ def _normalize_path(path: Union[str, Path]) -> Path:
     `Path.resolve()` does.
     """
     return Path(abspath(path))
+
+
+def _count_trailing_whitespace(text: str) -> int:
+    """Count the number of trailing whitespace characters in a string."""
+    count = 0
+    for char in reversed(str(text)):
+        if char.isspace():
+            count += 1
+        else:
+            break
+    return count
