@@ -188,11 +188,13 @@ data/**
         This test ensures that the issue is now fixed.
         """
         with TemporaryDirectory() as project_dir, TemporaryDirectory() as another_dir:
+            project_dir = Path(project_dir).resolve()
+            another_dir = Path(another_dir).resolve()
             matches = _parse_gitignore_string('link', fake_base_dir=project_dir)
 
             # Create a symlink to another directory.
-            link = Path(project_dir, 'link')
-            target = Path(another_dir, 'target')
+            link = project_dir / 'link'
+            target = another_dir / 'target'
             link.symlink_to(target)
 
             # Check the intended behavior according to
