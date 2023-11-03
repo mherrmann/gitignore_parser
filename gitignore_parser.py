@@ -218,3 +218,31 @@ def _normalize_path(path: Union[str, Path]) -> Path:
     `Path.resolve()` does.
     """
     return Path(abspath(path))
+
+
+def main():
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Ignores certain files depending on provided .gitignore")
+    parser.add_argument("files", nargs="+", help="Files to match")
+    parser.add_argument("-f", "--ignore-file",
+                        help="Path to a .gitignore file",
+                        default=".gitignore")
+    parser.add_argument("-n", "--negate", action="store_true",
+                        help="Negate the normal behavior and ignore files NOT in .gitignore")
+
+    args = parser.parse_args()
+
+    negate = args.negate
+    matches = parse_gitignore(args.ignore_file)
+    for to_match in args.files:
+        file_ignores = matches(to_match)
+        # default behavior: file is ignored by .gitignore --> move on
+        # negation: file is not in .gitignore --> move on
+        if (negate and not file_ignores) or (not negate and file_ignores):
+            continue
+        print(to_match)
+
+
+if __name__ == "__main__":
+    main()

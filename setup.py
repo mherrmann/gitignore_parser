@@ -40,5 +40,10 @@ setup(
     ],
     license='MIT',
     keywords='gitignore',
-    platforms=['MacOS', 'Windows', 'Debian', 'Fedora', 'CentOS']
+    platforms=['MacOS', 'Windows', 'Debian', 'Fedora', 'CentOS'],
+    entry_points={
+        'console_scripts': [
+            'gitignore_parser = gitignore_parser:main',
+        ]
+    }
 )
