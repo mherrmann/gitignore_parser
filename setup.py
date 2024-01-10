@@ -18,7 +18,7 @@ setup(
     url='https://github.com/mherrmann/gitignore_parser',
     py_modules=['gitignore_parser'],
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
 
         'License :: OSI Approved :: MIT License',
