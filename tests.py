@@ -201,6 +201,16 @@ data/**
             # files.
             self.assertTrue(matches(link))
 
+    def test_symlink_to_symlink_directory(self):
+        with TemporaryDirectory() as project_dir:
+            with TemporaryDirectory() as link_dir:
+                link = Path(link_dir, 'link')
+                link.symlink_to(project_dir)
+                file = Path(link, 'file.txt')
+                matches = _parse_gitignore_string('file.txt', fake_base_dir=str(link))
+                self.assertTrue(matches(file))
+
+
 def _parse_gitignore_string(data: str, fake_base_dir: str = None):
     with patch('builtins.open', mock_open(read_data=data)):
         success = parse_gitignore(f'{fake_base_dir}/.gitignore', fake_base_dir)

@@ -21,7 +21,7 @@ def parse_gitignore(full_path, base_dir=None):
         for line in ignore_file:
             counter += 1
             line = line.rstrip('\n')
-            rule = rule_from_pattern(line, base_path=Path(base_dir).resolve(),
+            rule = rule_from_pattern(line, base_path=_normalize_path(base_dir),
                                      source=(full_path, counter))
             if rule:
                 rules.append(rule)
@@ -41,8 +41,6 @@ def rule_from_pattern(pattern, base_path=None, source=None):
     Because git allows for nested .gitignore files, a base_path value
     is required for correct behavior. The base path should be absolute.
     """
-    if base_path and base_path != Path(base_path).resolve():
-        raise ValueError('base_path must be absolute')
     # Store the exact pattern for our repr and string functions
     orig_pattern = pattern
     # Early returns follow
