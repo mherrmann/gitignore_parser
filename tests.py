@@ -86,7 +86,8 @@ class Test(TestCase):
         self.assertTrue(matches('/home/michael/#imnocomment'))
 
     def test_ignore_directory(self):
-        matches = _parse_gitignore_string('.venv/', fake_base_dir='/home/michael')
+        matches = \
+            _parse_gitignore_string('.venv/', fake_base_dir='/home/michael')
         self.assertTrue(matches('/home/michael/.venv'))
         self.assertTrue(matches('/home/michael/.venv/folder'))
         self.assertTrue(matches('/home/michael/.venv/file.txt'))
@@ -94,7 +95,8 @@ class Test(TestCase):
         self.assertFalse(matches('/home/michael/.venv_no_folder.py'))
 
     def test_ignore_directory_asterisk(self):
-        matches = _parse_gitignore_string('.venv/*', fake_base_dir='/home/michael')
+        matches = \
+            _parse_gitignore_string('.venv/*', fake_base_dir='/home/michael')
         self.assertFalse(matches('/home/michael/.venv'))
         self.assertTrue(matches('/home/michael/.venv/folder'))
         self.assertTrue(matches('/home/michael/.venv/file.txt'))
@@ -112,20 +114,25 @@ class Test(TestCase):
         self.assertTrue(matches('/home/michael/waste.ignore'))
 
     def test_literal_exclamation_mark(self):
-        matches = _parse_gitignore_string('\\!ignore_me!', fake_base_dir='/home/michael')
+        matches = _parse_gitignore_string(
+            '\\!ignore_me!', fake_base_dir='/home/michael'
+        )
         self.assertTrue(matches('/home/michael/!ignore_me!'))
         self.assertFalse(matches('/home/michael/ignore_me!'))
         self.assertFalse(matches('/home/michael/ignore_me'))
 
     def test_double_asterisks(self):
-        matches = _parse_gitignore_string('foo/**/Bar', fake_base_dir='/home/michael')
+        matches = _parse_gitignore_string(
+            'foo/**/Bar', fake_base_dir='/home/michael'
+        )
         self.assertTrue(matches('/home/michael/foo/hello/Bar'))
         self.assertTrue(matches('/home/michael/foo/world/Bar'))
         self.assertTrue(matches('/home/michael/foo/Bar'))
         self.assertFalse(matches('/home/michael/foo/BarBar'))
 
     def test_double_asterisk_without_slashes_handled_like_single_asterisk(self):
-        matches = _parse_gitignore_string('a/b**c/d', fake_base_dir='/home/michael')
+        matches = \
+            _parse_gitignore_string('a/b**c/d', fake_base_dir='/home/michael')
         self.assertTrue(matches('/home/michael/a/bc/d'))
         self.assertTrue(matches('/home/michael/a/bXc/d'))
         self.assertTrue(matches('/home/michael/a/bbc/d'))
@@ -136,10 +143,12 @@ class Test(TestCase):
         self.assertFalse(matches('/home/michael/a/bb/XX/cc/d'))
 
     def test_more_asterisks_handled_like_single_asterisk(self):
-        matches = _parse_gitignore_string('***a/b', fake_base_dir='/home/michael')
+        matches = \
+            _parse_gitignore_string('***a/b', fake_base_dir='/home/michael')
         self.assertTrue(matches('/home/michael/XYZa/b'))
         self.assertFalse(matches('/home/michael/foo/a/b'))
-        matches = _parse_gitignore_string('a/b***', fake_base_dir='/home/michael')
+        matches = \
+            _parse_gitignore_string('a/b***', fake_base_dir='/home/michael')
         self.assertTrue(matches('/home/michael/a/bXYZ'))
         self.assertFalse(matches('/home/michael/a/b/foo'))
 
@@ -157,7 +166,9 @@ data/**
         self.assertFalse(matches('/home/michael/data/01_raw/raw_file.csv'))
         self.assertFalse(matches('/home/michael/data/02_processed/'))
         self.assertFalse(matches('/home/michael/data/02_processed/.gitkeep'))
-        self.assertTrue(matches('/home/michael/data/02_processed/processed_file.csv'))
+        self.assertTrue(
+            matches('/home/michael/data/02_processed/processed_file.csv')
+        )
 
     def test_single_asterisk(self):
         matches = _parse_gitignore_string('*', fake_base_dir='/home/michael')
@@ -166,12 +177,16 @@ data/**
         self.assertTrue(matches('/home/michael/directory-trailing/'))
 
     def test_supports_path_type_argument(self):
-        matches = _parse_gitignore_string('file1\n!file2', fake_base_dir='/home/michael')
+        matches = _parse_gitignore_string(
+            'file1\n!file2', fake_base_dir='/home/michael'
+        )
         self.assertTrue(matches(Path('/home/michael/file1')))
         self.assertFalse(matches(Path('/home/michael/file2')))
 
     def test_slash_in_range_does_not_match_dirs(self):
-        matches = _parse_gitignore_string('abc[X-Z/]def', fake_base_dir='/home/michael')
+        matches = _parse_gitignore_string(
+            'abc[X-Z/]def', fake_base_dir='/home/michael'
+        )
         self.assertFalse(matches('/home/michael/abcdef'))
         self.assertTrue(matches('/home/michael/abcXdef'))
         self.assertTrue(matches('/home/michael/abcYdef'))
@@ -180,26 +195,21 @@ data/**
         self.assertFalse(matches('/home/michael/abcXYZdef'))
 
     def test_symlink_to_another_directory(self):
-        """Test the behavior of a symlink to another directory.
+        with TemporaryDirectory() as project_dir:
+            with TemporaryDirectory() as another_dir:
+                matches = \
+                    _parse_gitignore_string('link', fake_base_dir=project_dir)
 
-        The issue https://github.com/mherrmann/gitignore_parser/issues/29 describes how
-        a symlink to another directory caused an exception to be raised during matching.
+                # Create a symlink to another directory.
+                link = Path(project_dir, 'link')
+                target = Path(another_dir, 'target')
+                link.symlink_to(target)
 
-        This test ensures that the issue is now fixed.
-        """
-        with TemporaryDirectory() as project_dir, TemporaryDirectory() as another_dir:
-            matches = _parse_gitignore_string('link', fake_base_dir=project_dir)
-
-            # Create a symlink to another directory.
-            link = Path(project_dir, 'link')
-            target = Path(another_dir, 'target')
-            link.symlink_to(target)
-
-            # Check the intended behavior according to
-            # https://git-scm.com/docs/gitignore#_notes:
-            # Symbolic links are not followed and are matched as if they were regular
-            # files.
-            self.assertTrue(matches(link))
+                # Check the intended behavior according to
+                # https://git-scm.com/docs/gitignore#_notes:
+                # Symbolic links are not followed and are matched as if they
+                # were regular files.
+                self.assertTrue(matches(link))
 
     def test_symlink_to_symlink_directory(self):
         with TemporaryDirectory() as project_dir:
@@ -207,7 +217,8 @@ data/**
                 link = Path(link_dir, 'link')
                 link.symlink_to(project_dir)
                 file = Path(link, 'file.txt')
-                matches = _parse_gitignore_string('file.txt', fake_base_dir=str(link))
+                matches = \
+                    _parse_gitignore_string('file.txt', fake_base_dir=str(link))
                 self.assertTrue(matches(file))
 
 
