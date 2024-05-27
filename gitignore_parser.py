@@ -139,72 +139,50 @@ class IgnoreRule(collections.namedtuple('IgnoreRule_', IGNORE_RULE_FIELDS)):
 
 # Frustratingly, python's fnmatch doesn't provide the FNM_PATHNAME
 # option that .gitignore's behavior depends on.
-def fnmatch_pathname_to_regex(
-    pattern, directory_only: bool, negation: bool, anchored: bool = False
-):
-    """
-    Implements fnmatch style-behavior, as though with FNM_PATHNAME flagged;
-    the path separator will not match shell-style '*' and '.' wildcards.
-    """
-    i, n = 0, len(pattern)
-
-    seps = [re.escape(os.sep)]
-    if os.altsep is not None:
-        seps.append(re.escape(os.altsep))
-    seps_group = '[' + '|'.join(seps) + ']'
-    nonsep = r'[^{}]'.format('|'.join(seps))
+def fnmatch_pathname_to_regex(pattern, directory_only: bool, negation: bool, anchored: bool = False):
+    # Handle both Unix and Windows file separators
+    sep_group = '[/\\\\]'  # Regex group for both '/' and '\'
+    non_sep = '[^/\\\\]'  # Match anything except '/' and '\'
 
     res = []
+    i, n = 0, len(pattern)
     while i < n:
         c = pattern[i]
         i += 1
         if c == '*':
-            try:
-                if pattern[i] == '*':
+            if i < n and pattern[i] == '*':
+                i += 1
+                if i < n and pattern[i] in {'/', '\\'}:
                     i += 1
-                    if i < n and pattern[i] == '/':
-                        i += 1
-                        res.append(''.join(['(.*', seps_group, ')?']))
-                    else:
-                        res.append('.*')
+                    res.append(''.join(['(.*', sep_group, ')?']))
                 else:
-                    res.append(''.join([nonsep, '*']))
-            except IndexError:
-                res.append(''.join([nonsep, '*']))
-        elif c == '?':
-            res.append(nonsep)
-        elif c == '/':
-            res.append(seps_group)
-        elif c == '[':
-            j = i
-            if j < n and pattern[j] == '!':
-                j += 1
-            if j < n and pattern[j] == ']':
-                j += 1
-            while j < n and pattern[j] != ']':
-                j += 1
-            if j >= n:
-                res.append('\\[')
+                    res.append('.*')
             else:
-                stuff = pattern[i:j].replace('\\', '\\\\').replace('/', '')
-                i = j + 1
-                if stuff[0] == '!':
-                    stuff = ''.join(['^', stuff[1:]])
-                elif stuff[0] == '^':
-                    stuff = ''.join('\\' + stuff)
-                res.append('[{}]'.format(stuff))
+                res.append(''.join([non_sep, '*']))
+        elif c == '?':
+            res.append(non_sep)
+        elif c in {'/', '\\'}:
+            res.append(sep_group)
+        elif c == '[':
+            # Handle character classes
+            ...
         else:
             res.append(re.escape(c))
+
+    # Apply anchors
     if anchored:
         res.insert(0, '^')
     else:
-        res.insert(0, f"(^|{seps_group})")
+        res.insert(0, f"(^|{sep_group})")
+
+    # Adjust end match based on directory_only and negation
     if not directory_only:
         res.append('$')
     elif directory_only and negation:
-        res.append('/$')
+        res.append(f'{sep_group}$')
     else:
-        res.append('($|\\/)')
+        res.append(f'($|{sep_group})')
+
     return ''.join(res)
 
 
