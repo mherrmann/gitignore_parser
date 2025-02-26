@@ -1,7 +1,7 @@
 import collections
 import os
 import re
-
+import sys
 from os.path import abspath, dirname
 from pathlib import Path
 from typing import Reversible, Union
@@ -208,11 +208,27 @@ def fnmatch_pathname_to_regex(
     return ''.join(res)
 
 
+def _is_fs_case_insensitive() -> bool:
+    """Check if the current filesystem is case-insensitive."""
+    return sys.platform == 'win32' or (sys.platform == 'darwin' and not Path('/').is_symlink())
+
 def _normalize_path(path: Union[str, Path]) -> Path:
     """Normalize a path without resolving symlinks.
-
+    Ensures the path uses the correct casing on case-insensitive file systems.
     This is equivalent to `Path.resolve()` except that it does not resolve symlinks.
     Note that this simplifies paths by removing double slashes, `..`, `.` etc. like
     `Path.resolve()` does.
     """
-    return Path(abspath(path))
+    path = Path(abspath(path))
+    if not _is_fs_case_insensitive():
+        return path
+    parts = path.parts
+    case_correct_path = Path(parts[0])
+    for part in parts[1:]:
+        try:
+            entries = {entry.name.lower(): entry.name for entry in os.scandir(case_correct_path)}
+            case_correct_path = case_correct_path / entries[part.lower()]
+        except (FileNotFoundError, KeyError):
+            # If the correct case isn't found, or if the given path does not exist, assume the original is case correct.
+            case_correct_path = case_correct_path / part
+    return case_correct_path
