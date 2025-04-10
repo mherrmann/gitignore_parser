@@ -14,9 +14,9 @@ def handle_negation(file_path, rules: Reversible["IgnoreRule"]):
 
 def parse_gitignore(full_path, base_dir=None):
     with open(full_path) as ignore_file:
-        return parse_gitignore_string(ignore_file.read(), full_path, base_dir)
+        return parse_gitignore_str(ignore_file.read(), full_path, base_dir)
 
-def parse_gitignore_string(gitignore_str, full_path, base_dir=None):
+def parse_gitignore_str(gitignore_str, full_path, base_dir=None):
     if base_dir is None:
         base_dir = dirname(full_path)
     base_dir = _normalize_path(base_dir)
