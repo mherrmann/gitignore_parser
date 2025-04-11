@@ -24,6 +24,7 @@ def parse_gitignore_str(gitignore_str, base_dir):
     return _parse_gitignore_lines(lines, full_path, base_dir)
 
 def _parse_gitignore_lines(lines, full_path, base_dir):
+    base_dir = _normalize_path(base_dir)
     rules = []
     for line_no, line in enumerate(lines, start=1):
         rule = rule_from_pattern(
@@ -105,7 +106,7 @@ def rule_from_pattern(pattern, base_path=None, source=None):
         negation=negation,
         directory_only=directory_only,
         anchored=anchored,
-        base_path=_normalize_path(base_path) if base_path else None,
+        base_path=base_path if base_path else None,
         source=source
     )
 
