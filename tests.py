@@ -12,7 +12,7 @@ class Test(TestCase):
         matches = parse_gitignore_str(
             '__pycache__/\n'
             '*.py[cod]',
-            base_dir='/home/michael/'
+            base_dir='/home/michael'
         )
         self.assertFalse(matches('/home/michael/main.py'))
         self.assertTrue(matches('/home/michael/main.pyc'))
@@ -30,7 +30,7 @@ class Test(TestCase):
             self.assertTrue(matches('/home/michael/__pycache__'))
 
     def test_incomplete_filename(self):
-        matches = parse_gitignore_str('o.py', base_dir='/home/michael/')
+        matches = parse_gitignore_str('o.py', base_dir='/home/michael')
         self.assertTrue(matches('/home/michael/o.py'))
         self.assertFalse(matches('/home/michael/foo.py'))
         self.assertFalse(matches('/home/michael/o.pyc'))
@@ -41,7 +41,7 @@ class Test(TestCase):
     def test_wildcard(self):
         matches = parse_gitignore_str(
             'hello.*',
-            base_dir='/home/michael/'
+            base_dir='/home/michael'
         )
         self.assertTrue(matches('/home/michael/hello.txt'))
         self.assertTrue(matches('/home/michael/hello.foobar/'))
@@ -53,7 +53,7 @@ class Test(TestCase):
     def test_anchored_wildcard(self):
         matches = parse_gitignore_str(
             '/hello.*',
-            base_dir='/home/michael/'
+            base_dir='/home/michael'
         )
         self.assertTrue(matches('/home/michael/hello.txt'))
         self.assertTrue(matches('/home/michael/hello.c'))
@@ -66,7 +66,7 @@ class Test(TestCase):
             'partiallyignoredspace\\  \n'
             'partiallyignoredspace2 \\  \n'
             'notignoredmultiplespace\\ \\ \\ ',
-            base_dir='/home/michael/'
+            base_dir='/home/michael'
         )
         self.assertTrue(matches('/home/michael/ignoretrailingspace'))
         self.assertFalse(matches('/home/michael/ignoretrailingspace '))
@@ -88,7 +88,7 @@ class Test(TestCase):
                         '#realcomment\n'
                         'othermatch\n'
                         '\\#imnocomment',
-            base_dir='/home/michael/'
+            base_dir='/home/michael'
         )
         self.assertTrue(matches('/home/michael/somematch'))
         self.assertFalse(matches('/home/michael/#realcomment'))
@@ -97,7 +97,7 @@ class Test(TestCase):
 
     def test_ignore_directory(self):
         matches = \
-            parse_gitignore_str('.venv/', base_dir='/home/michael/')
+            parse_gitignore_str('.venv/', base_dir='/home/michael')
         self.assertTrue(matches('/home/michael/.venv'))
         self.assertTrue(matches('/home/michael/.venv/folder'))
         self.assertTrue(matches('/home/michael/.venv/file.txt'))
@@ -106,7 +106,7 @@ class Test(TestCase):
 
     def test_ignore_directory_asterisk(self):
         matches = \
-            parse_gitignore_str('.venv/*', base_dir='/home/michael/')
+            parse_gitignore_str('.venv/*', base_dir='/home/michael')
         self.assertFalse(matches('/home/michael/.venv'))
         self.assertTrue(matches('/home/michael/.venv/folder'))
         self.assertTrue(matches('/home/michael/.venv/file.txt'))
@@ -117,7 +117,7 @@ class Test(TestCase):
 *.ignore
 !keep.ignore
             ''',
-            base_dir='/home/michael/'
+            base_dir='/home/michael'
         )
         self.assertTrue(matches('/home/michael/trash.ignore'))
         self.assertFalse(matches('/home/michael/keep.ignore'))
@@ -125,7 +125,7 @@ class Test(TestCase):
 
     def test_literal_exclamation_mark(self):
         matches = parse_gitignore_str(
-            '\\!ignore_me!', base_dir='/home/michael/'
+            '\\!ignore_me!', base_dir='/home/michael'
         )
         self.assertTrue(matches('/home/michael/!ignore_me!'))
         self.assertFalse(matches('/home/michael/ignore_me!'))
@@ -133,7 +133,7 @@ class Test(TestCase):
 
     def test_double_asterisks(self):
         matches = parse_gitignore_str(
-            'foo/**/Bar', base_dir='/home/michael/'
+            'foo/**/Bar', base_dir='/home/michael'
         )
         self.assertTrue(matches('/home/michael/foo/hello/Bar'))
         self.assertTrue(matches('/home/michael/foo/world/Bar'))
@@ -142,7 +142,7 @@ class Test(TestCase):
 
     def test_double_asterisk_without_slashes_handled_like_single_asterisk(self):
         matches = \
-            parse_gitignore_str('a/b**c/d', base_dir='/home/michael/')
+            parse_gitignore_str('a/b**c/d', base_dir='/home/michael')
         self.assertTrue(matches('/home/michael/a/bc/d'))
         self.assertTrue(matches('/home/michael/a/bXc/d'))
         self.assertTrue(matches('/home/michael/a/bbc/d'))
@@ -154,11 +154,11 @@ class Test(TestCase):
 
     def test_more_asterisks_handled_like_single_asterisk(self):
         matches = \
-            parse_gitignore_str('***a/b', base_dir='/home/michael/')
+            parse_gitignore_str('***a/b', base_dir='/home/michael')
         self.assertTrue(matches('/home/michael/XYZa/b'))
         self.assertFalse(matches('/home/michael/foo/a/b'))
         matches = \
-            parse_gitignore_str('a/b***', base_dir='/home/michael/')
+            parse_gitignore_str('a/b***', base_dir='/home/michael')
         self.assertTrue(matches('/home/michael/a/bXYZ'))
         self.assertFalse(matches('/home/michael/a/b/foo'))
 
@@ -169,7 +169,7 @@ data/**
 !.gitkeep
 !data/01_raw/*
             ''',
-            base_dir='/home/michael/'
+            base_dir='/home/michael'
         )
         self.assertFalse(matches('/home/michael/data/01_raw/'))
         self.assertFalse(matches('/home/michael/data/01_raw/.gitkeep'))
@@ -181,21 +181,21 @@ data/**
         )
 
     def test_single_asterisk(self):
-        matches = parse_gitignore_str('*', base_dir='/home/michael/')
+        matches = parse_gitignore_str('*', base_dir='/home/michael')
         self.assertTrue(matches('/home/michael/file.txt'))
         self.assertTrue(matches('/home/michael/directory'))
         self.assertTrue(matches('/home/michael/directory-trailing/'))
 
     def test_supports_path_type_argument(self):
         matches = parse_gitignore_str(
-            'file1\n!file2', base_dir='/home/michael/'
+            'file1\n!file2', base_dir='/home/michael'
         )
         self.assertTrue(matches(Path('/home/michael/file1')))
         self.assertFalse(matches(Path('/home/michael/file2')))
 
     def test_slash_in_range_does_not_match_dirs(self):
         matches = parse_gitignore_str(
-            'abc[X-Z/]def', base_dir='/home/michael/'
+            'abc[X-Z/]def', base_dir='/home/michael'
         )
         self.assertFalse(matches('/home/michael/abcdef'))
         self.assertTrue(matches('/home/michael/abcXdef'))

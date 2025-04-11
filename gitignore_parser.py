@@ -2,7 +2,7 @@ import collections
 import os
 import re
 
-from os.path import abspath, dirname
+from os.path import abspath, dirname, join
 from pathlib import Path
 from typing import Reversible, Union
 
@@ -19,7 +19,7 @@ def parse_gitignore(full_path, base_dir=None):
         return _parse_gitignore_lines(ignore_file, full_path, base_dir)
 
 def parse_gitignore_str(gitignore_str, base_dir):
-    full_path = os.path.join(base_dir, '.gitignore')
+    full_path = join(base_dir, '.gitignore')
     lines = gitignore_str.splitlines()
     return _parse_gitignore_lines(lines, full_path, base_dir)
 
