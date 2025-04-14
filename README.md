@@ -29,6 +29,16 @@ Then:
     >>> matches('/home/michael/project/__pycache__')
     True
 
+Alternatively, you can use the `parse_gitignore_str` function:
+
+    >>> from gitignore_parser import parse_gitignore_str
+    >>> matches = parse_gitignore_str(
+        '__pycache__/\n*.py[cod]', base_dir='/home/michael/project')
+    >>> matches('/home/michael/project/main.py')
+    False
+    >>> matches('/home/michael/project/main.pyc')
+    True
+
 ## Motivation
 
 I couldn't find a good library for doing the above on PyPI. There are
