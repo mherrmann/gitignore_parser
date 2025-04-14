@@ -1,0 +1,24 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# Not the top-most EditorConfig file, only contains settings for this project.
+root = false
+
+# Unix-style newlines for all files
+[*]
+end_of_line = lf
+
+# Set default charset
+[*.{py,md,cfg,yml,gitignore}]
+charset = utf-8
+
+# Style for Python
+[*.py]
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+
+# Style for YAML
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+insert_final_newline = true
