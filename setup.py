@@ -17,6 +17,7 @@ setup(
     author_email='michael+removethisifyouarehuman@herrmann.io',
     url='https://github.com/mherrmann/gitignore_parser',
     py_modules=['gitignore_parser'],
+    package_data={'gitignore_parser': ['py.typed']},
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',

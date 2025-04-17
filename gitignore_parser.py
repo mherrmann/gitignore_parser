@@ -4,7 +4,7 @@ import re
 
 from os.path import abspath, dirname, join
 from pathlib import Path
-from typing import Reversible, Union
+from typing import Any, Callable, Iterable, List, Optional, Reversible, Union
 
 def handle_negation(file_path, rules: Reversible["IgnoreRule"]):
     for rule in reversed(rules):
@@ -12,20 +12,26 @@ def handle_negation(file_path, rules: Reversible["IgnoreRule"]):
             return not rule.negation
     return False
 
-def parse_gitignore(full_path, base_dir=None):
+def parse_gitignore(
+    full_path: Union[str, Path], base_dir: Optional[Union[str, Path]] = None
+) -> Callable[[Union[str, Path]], bool]:
     if base_dir is None:
         base_dir = dirname(full_path)
     with open(full_path) as ignore_file:
         return _parse_gitignore_lines(ignore_file, full_path, base_dir)
 
-def parse_gitignore_str(gitignore_str, base_dir):
+def parse_gitignore_str(
+    gitignore_str: str, base_dir: Union[str, Path]
+) -> Callable[[Union[str, Path]], bool]:
     full_path = join(base_dir, '.gitignore')
     lines = gitignore_str.splitlines()
     return _parse_gitignore_lines(lines, full_path, base_dir)
 
-def _parse_gitignore_lines(lines, full_path, base_dir):
+def _parse_gitignore_lines(
+    lines: Iterable[str], full_path: Union[str, Path], base_dir: Union[str, Path]
+) -> Callable[[Union[str, Path]], bool]:
     base_dir = _normalize_path(base_dir)
-    rules = []
+    rules: List[IgnoreRule] = []
     for line_no, line in enumerate(lines, start=1):
         rule = rule_from_pattern(
             line.rstrip('\n'), base_path=base_dir, source=(full_path, line_no))
@@ -38,7 +44,9 @@ def _parse_gitignore_lines(lines, full_path, base_dir):
         # Later rules override earlier rules.
         return lambda file_path: handle_negation(file_path, rules)
 
-def rule_from_pattern(pattern, base_path=None, source=None):
+def rule_from_pattern(
+    pattern : str, base_path: Optional[Union[str, Path]]=None, source: Optional[Any]=None
+) -> Optional["IgnoreRule"]:
     """
     Take a .gitignore match pattern, such as "*.py[cod]" or "**/*.bak",
     and return an IgnoreRule suitable for matching against files and
@@ -146,7 +154,7 @@ class IgnoreRule(collections.namedtuple('IgnoreRule_', IGNORE_RULE_FIELDS)):
 # Frustratingly, python's fnmatch doesn't provide the FNM_PATHNAME
 # option that .gitignore's behavior depends on.
 def fnmatch_pathname_to_regex(
-    pattern, directory_only: bool, negation: bool, anchored: bool = False
+    pattern: str, directory_only: bool, negation: bool, anchored: bool = False
 ):
     """
     Implements fnmatch style-behavior, as though with FNM_PATHNAME flagged;
@@ -160,7 +168,7 @@ def fnmatch_pathname_to_regex(
     seps_group = '[' + '|'.join(seps) + ']'
     nonsep = r'[^{}]'.format('|'.join(seps))
 
-    res = []
+    res: List[str] = []
     while i < n:
         c = pattern[i]
         i += 1
