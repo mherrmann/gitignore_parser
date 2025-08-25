@@ -4,6 +4,7 @@ import re
 
 from os.path import abspath, dirname, join
 from pathlib import Path
+import sys
 from typing import Reversible, Union
 
 def handle_negation(file_path, rules: Reversible["IgnoreRule"]):
@@ -129,9 +130,14 @@ class IgnoreRule(collections.namedtuple('IgnoreRule_', IGNORE_RULE_FIELDS)):
     def match(self, abs_path: Union[str, Path]):
         matched = False
         if self.base_path:
-            rel_path = str(_normalize_path(abs_path).relative_to(self.base_path))
+            rel_path = _normalize_path(abs_path).relative_to(self.base_path).as_posix()
         else:
-            rel_path = str(_normalize_path(abs_path))
+            rel_path = _normalize_path(abs_path).as_posix()
+        # Path() strips the trailing following symbols on windows, so we need to
+        # preserve it: ' ', '.'
+        if sys.platform.startswith('win'):
+            rel_path += ' ' * _count_trailing_symbol(' ', abs_path)
+            rel_path += '.' * _count_trailing_symbol('.', abs_path)
         # Path() strips the trailing slash, so we need to preserve it
         # in case of directory-only negation
         if self.negation and type(abs_path) == str and abs_path[-1] == '/':
@@ -222,3 +228,14 @@ def _normalize_path(path: Union[str, Path]) -> Path:
     `Path.resolve()` does.
     """
     return Path(abspath(path))
+
+
+def _count_trailing_symbol(symbol: str, text: str) -> int:
+    """Count the number of trailing characters in a string."""
+    count = 0
+    for char in reversed(str(text)):
+        if char == symbol:
+            count += 1
+        else:
+            break
+    return count

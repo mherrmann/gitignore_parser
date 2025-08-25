@@ -4,7 +4,7 @@ from tempfile import TemporaryDirectory
 
 from gitignore_parser import parse_gitignore, parse_gitignore_str
 
-from unittest import TestCase, main
+from unittest import TestCase, main, SkipTest
 
 
 class Test(TestCase):
@@ -206,13 +206,20 @@ data/**
 
     def test_symlink_to_another_directory(self):
         with TemporaryDirectory() as project_dir:
+            project_dir = Path(project_dir).resolve()
             with TemporaryDirectory() as another_dir:
+                another_dir = Path(another_dir).resolve()
                 matches = parse_gitignore_str('link', base_dir=project_dir)
 
                 # Create a symlink to another directory.
-                link = Path(project_dir, 'link')
-                target = Path(another_dir, 'target')
-                link.symlink_to(target)
+                link = project_dir / 'link'
+                target = another_dir / 'target'
+                try:
+                    link.symlink_to(target)
+                except OSError:
+                    raise SkipTest(
+                        "Current user does not have permissions to perform symlink."
+                    )
 
                 # Check the intended behavior according to
                 # https://git-scm.com/docs/gitignore#_notes:
@@ -222,13 +229,19 @@ data/**
 
     def test_symlink_to_symlink_directory(self):
         with TemporaryDirectory() as project_dir:
+            project_dir = Path(project_dir).resolve()
             with TemporaryDirectory() as link_dir:
-                link = Path(link_dir, 'link')
-                link.symlink_to(project_dir)
+                link_dir = Path(link_dir).resolve()
+                link = link_dir / 'link'
+                try:
+                    link.symlink_to(project_dir)
+                except OSError:
+                    raise SkipTest(
+                        "Current user does not have permissions to perform symlink."
+                    )
                 file = Path(link, 'file.txt')
                 matches = parse_gitignore_str('file.txt', base_dir=str(link_dir))
                 self.assertTrue(matches(file))
-
 
 if __name__ == '__main__':
     main()
