@@ -231,7 +231,7 @@ data/**
         with TemporaryDirectory() as project_dir:
             project_dir = Path(project_dir).resolve()
             with TemporaryDirectory() as link_dir:
-                link_dir = link_dir.resolve()
+                link_dir = Path(link_dir).resolve()
                 link = link_dir / 'link'
                 try:
                     link.symlink_to(project_dir)
