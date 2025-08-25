@@ -2,7 +2,7 @@ import collections
 import os
 import re
 
-from os.path import abspath, dirname
+from os.path import abspath, dirname, join
 from pathlib import Path
 import sys
 from typing import Reversible, Union
@@ -16,16 +16,22 @@ def handle_negation(file_path, rules: Reversible["IgnoreRule"]):
 def parse_gitignore(full_path, base_dir=None):
     if base_dir is None:
         base_dir = dirname(full_path)
-    rules = []
     with open(full_path) as ignore_file:
-        counter = 0
-        for line in ignore_file:
-            counter += 1
-            line = line.rstrip('\n')
-            rule = rule_from_pattern(line, base_path=Path(base_dir).resolve(),
-                                     source=(full_path, counter))
-            if rule:
-                rules.append(rule)
+        return _parse_gitignore_lines(ignore_file, full_path, base_dir)
+
+def parse_gitignore_str(gitignore_str, base_dir):
+    full_path = join(base_dir, '.gitignore')
+    lines = gitignore_str.splitlines()
+    return _parse_gitignore_lines(lines, full_path, base_dir)
+
+def _parse_gitignore_lines(lines, full_path, base_dir):
+    base_dir = _normalize_path(base_dir)
+    rules = []
+    for line_no, line in enumerate(lines, start=1):
+        rule = rule_from_pattern(
+            line.rstrip('\n'), base_path=base_dir, source=(full_path, line_no))
+        if rule:
+            rules.append(rule)
     if not any(r.negation for r in rules):
         return lambda file_path: any(r.match(file_path) for r in rules)
     else:
@@ -42,8 +48,6 @@ def rule_from_pattern(pattern, base_path=None, source=None):
     Because git allows for nested .gitignore files, a base_path value
     is required for correct behavior. The base path should be absolute.
     """
-    if base_path and base_path != Path(base_path).resolve():
-        raise ValueError('base_path must be absolute')
     # Store the exact pattern for our repr and string functions
     orig_pattern = pattern
     # Early returns follow
@@ -103,7 +107,7 @@ def rule_from_pattern(pattern, base_path=None, source=None):
         negation=negation,
         directory_only=directory_only,
         anchored=anchored,
-        base_path=_normalize_path(base_path) if base_path else None,
+        base_path=base_path if base_path else None,
         source=source
     )
 

@@ -9,7 +9,7 @@ from setuptools import setup
 description = 'A spec-compliant gitignore parser for Python 3.5+'
 setup(
     name='gitignore_parser',
-    version='0.1.9',
+    version='0.1.12',
     description=description,
     long_description=
         description + '\n\nhttps://github.com/mherrmann/gitignore_parser',
@@ -18,7 +18,7 @@ setup(
     url='https://github.com/mherrmann/gitignore_parser',
     py_modules=['gitignore_parser'],
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
 
         'License :: OSI Approved :: MIT License',
@@ -34,6 +34,7 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
 
         'Topic :: Software Development :: Libraries',
         'Topic :: Software Development :: Libraries :: Python Modules'
