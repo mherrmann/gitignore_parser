@@ -9,7 +9,7 @@ from setuptools import setup
 description = 'A spec-compliant gitignore parser for Python 3.5+'
 setup(
     name='gitignore_parser',
-    version='0.1.12',
+    version='0.1.13',
     description=description,
     long_description=
         description + '\n\nhttps://github.com/mherrmann/gitignore_parser',
