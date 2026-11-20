@@ -38,6 +38,17 @@ class Test(TestCase):
         self.assertFalse(matches('/home/michael/dir/foo.py'))
         self.assertFalse(matches('/home/michael/dir/o.pyc'))
 
+    def test_parse_file_encoding(self):
+        with TemporaryDirectory() as project_dir:
+            project_dir = Path(project_dir)
+            ignore_file = project_dir / '.gitignore'
+            for encoding in ('utf-8', 'utf-16', 'cp1252'):
+                with self.subTest(encoding=encoding):
+                    ignore_file.write_text('caf\u00e9.py\n', encoding=encoding)
+                    matches = parse_gitignore(ignore_file, encoding=encoding)
+                    self.assertTrue(matches(project_dir / 'caf\u00e9.py'))
+                    self.assertFalse(matches(project_dir / 'main.py'))
+
     def test_wildcard(self):
         matches = parse_gitignore_str(
             'hello.*',
