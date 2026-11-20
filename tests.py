@@ -38,6 +38,29 @@ class Test(TestCase):
         self.assertFalse(matches('/home/michael/dir/foo.py'))
         self.assertFalse(matches('/home/michael/dir/o.pyc'))
 
+    def test_ignored_backup_directory_contents(self):
+        matches = parse_gitignore_str(
+            '*/backup/*\n!*/backup/backup.sh', base_dir='/home/michael')
+        self.assertTrue(matches('/home/michael/notebooks/backup/archive/data'))
+        self.assertTrue(matches('/home/michael/notebooks/backup/archive/backup.sh'))
+        self.assertFalse(matches('/home/michael/notebooks/backup/backup.sh'))
+
+    def test_ignored_directory_without_trailing_slash(self):
+        matches = parse_gitignore_str('/node_modules', base_dir='/home/michael')
+        self.assertTrue(matches('/home/michael/node_modules/package/index.js'))
+        self.assertFalse(matches('/home/michael/src/node_modules/package/index.js'))
+
+    def test_negation_cannot_include_a_file_in_an_ignored_parent(self):
+        matches = parse_gitignore_str(
+            'foo/*\n!foo/bar/keep', base_dir='/home/michael')
+        self.assertTrue(matches('/home/michael/foo/bar/keep'))
+
+    def test_negation_can_include_a_parent_before_its_contents(self):
+        matches = parse_gitignore_str(
+            'foo/*\n!foo/bar', base_dir='/home/michael')
+        self.assertFalse(matches('/home/michael/foo/bar/keep'))
+        self.assertTrue(matches('/home/michael/foo/other/keep'))
+
     def test_wildcard(self):
         matches = parse_gitignore_str(
             'hello.*',
@@ -160,7 +183,9 @@ class Test(TestCase):
         matches = \
             parse_gitignore_str('a/b***', base_dir='/home/michael')
         self.assertTrue(matches('/home/michael/a/bXYZ'))
-        self.assertFalse(matches('/home/michael/a/b/foo'))
+        # The parent directory a/b is ignored, so its contents are ignored too.
+        self.assertTrue(matches('/home/michael/a/b/foo'))
+        self.assertFalse(matches('/home/michael/a/c/foo'))
 
     def test_directory_only_negation(self):
         matches = parse_gitignore_str('''
