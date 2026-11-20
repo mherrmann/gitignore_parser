@@ -29,6 +29,9 @@ Then:
     >>> matches('/home/michael/project/__pycache__')
     True
 
+To specify the ignore file's encoding, pass `encoding='utf-8'` (or another
+encoding) to `parse_gitignore`. By default, Python's default text encoding is used.
+
 Alternatively, you can use the `parse_gitignore_str` function:
 
     >>> from gitignore_parser import parse_gitignore_str
