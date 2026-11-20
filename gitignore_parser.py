@@ -33,11 +33,30 @@ def _parse_gitignore_lines(lines, full_path, base_dir):
         if rule:
             rules.append(rule)
     if not any(r.negation for r in rules):
-        return lambda file_path: any(r.match(file_path) for r in rules)
+        matches_path = lambda file_path: any(r.match(file_path) for r in rules)
     else:
         # We have negation rules. We can't use a simple "any" to evaluate them.
         # Later rules override earlier rules.
-        return lambda file_path: handle_negation(file_path, rules)
+        matches_path = lambda file_path: handle_negation(file_path, rules)
+
+    def matches(file_path):
+        if matches_path(file_path):
+            return True
+        if not rules:
+            return False
+        path = _normalize_path(file_path)
+        if path == base_dir:
+            return False
+        # An excluded directory excludes everything below it. Apply all rules
+        # to each parent first, so negations can still re-include the parent.
+        for parent in path.parents:
+            if parent == base_dir:
+                break
+            if matches_path(str(parent) + '/'):
+                return True
+        return False
+
+    return matches
 
 def rule_from_pattern(pattern, base_path=None, source=None):
     """
@@ -140,7 +159,8 @@ class IgnoreRule(collections.namedtuple('IgnoreRule_', IGNORE_RULE_FIELDS)):
             rel_path += '.' * _count_trailing_symbol('.', abs_path)
         # Path() strips the trailing slash, so we need to preserve it
         # in case of directory-only negation
-        if self.negation and type(abs_path) == str and abs_path[-1] == '/':
+        if (self.negation and self.directory_only and
+                type(abs_path) == str and abs_path[-1] == '/'):
             rel_path += '/'
         if rel_path.startswith('./'):
             rel_path = rel_path[2:]
