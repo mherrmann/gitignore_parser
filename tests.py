@@ -162,6 +162,25 @@ class Test(TestCase):
         self.assertTrue(matches('/home/michael/a/bXYZ'))
         self.assertFalse(matches('/home/michael/a/b/foo'))
 
+    def test_double_asterisk_only(self):
+        for pattern in ('**', '/**'):
+            matches = parse_gitignore_str(pattern, base_dir='/home/michael')
+            self.assertTrue(matches('/home/michael/file.txt'))
+            self.assertTrue(matches('/home/michael/dir/file.txt'))
+            self.assertTrue(matches('/home/michael/dir/sub/file.txt'))
+        matches = parse_gitignore_str('**/', base_dir='/home/michael')
+        self.assertTrue(matches('/home/michael/dir/file.txt'))
+        self.assertTrue(matches('/home/michael/dir/sub/file.txt'))
+        matches = parse_gitignore_str('*.txt\n!**', base_dir='/home/michael')
+        self.assertFalse(matches('/home/michael/file.txt'))
+        self.assertFalse(matches('/home/michael/dir/file.txt'))
+
+    def test_patterns_that_are_empty_after_prefix(self):
+        matches = parse_gitignore_str('a\n!\n\\', base_dir='/home/michael')
+        self.assertTrue(matches('/home/michael/a'))
+        self.assertTrue(matches('/home/michael/dir/a'))
+        self.assertFalse(matches('/home/michael/b'))
+
     def test_directory_only_negation(self):
         matches = parse_gitignore_str('''
 data/**

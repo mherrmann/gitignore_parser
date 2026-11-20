@@ -60,6 +60,8 @@ def rule_from_pattern(pattern, base_path=None, source=None):
         pattern = pattern[1:]
     else:
         negation = False
+    if not pattern:
+        return
     # Multi-asterisks not surrounded by slashes (or at the start/end) should
     # be treated like single-asterisks.
     pattern = re.sub(r'([^/])\*{2,}', r'\1*', pattern)
@@ -75,16 +77,16 @@ def rule_from_pattern(pattern, base_path=None, source=None):
     anchored = '/' in pattern[:-1]
     if pattern[0] == '/':
         pattern = pattern[1:]
-    if pattern[0] == '*' and len(pattern) >= 2 and pattern[1] == '*':
-        pattern = pattern[2:]
-        anchored = False
-    if pattern[0] == '/':
-        pattern = pattern[1:]
     if pattern[-1] == '/':
         pattern = pattern[:-1]
+    # A leading '**/' matches in all directories. A lone '**' is left as is
+    # and matches everything.
+    if pattern.startswith('**/'):
+        pattern = pattern[3:]
+        anchored = False
     # patterns with leading hashes or exclamation marks are escaped with a
     # backslash in front, unescape it
-    if pattern[0] == '\\' and pattern[1] in ('#', '!'):
+    if pattern[:2] in ('\\#', '\\!'):
         pattern = pattern[1:]
     # trailing spaces are ignored unless they are escaped with a backslash
     i = len(pattern)-1
