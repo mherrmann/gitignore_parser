@@ -111,6 +111,44 @@ class Test(TestCase):
         self.assertTrue(matches('/home/michael/.venv/folder'))
         self.assertTrue(matches('/home/michael/.venv/file.txt'))
 
+    def test_directory_only_file_type_hint(self):
+        matches = parse_gitignore_str('build*/', base_dir='/home/michael')
+        self.assertFalse(matches('/home/michael/build.sh', is_dir=False))
+        self.assertFalse(matches('/home/michael/cmake/build_script.cmake', is_dir=False))
+        self.assertTrue(matches('/home/michael/build', is_dir=True))
+        self.assertTrue(matches('/home/michael/cmake/build_debug', is_dir=True))
+        self.assertTrue(matches('/home/michael/build/source.c', is_dir=False))
+        # Omitting the hint retains the existing path-only behavior.
+        self.assertTrue(matches('/home/michael/build'))
+
+    def test_directory_only_hint_with_path_objects(self):
+        matches = parse_gitignore_str('/build*/', base_dir='/home/michael')
+        self.assertFalse(matches(Path('/home/michael/build'), is_dir=False))
+        self.assertTrue(matches(Path('/home/michael/build'), is_dir=True))
+        self.assertFalse(matches(Path('/home/michael/nested/build'), is_dir=True))
+
+    def test_directory_only_hint_with_negation(self):
+        matches = parse_gitignore_str(
+            '*.tmp\n!keep.tmp/', base_dir='/home/michael'
+        )
+        self.assertTrue(matches('/home/michael/keep.tmp', is_dir=False))
+        self.assertFalse(matches('/home/michael/keep.tmp', is_dir=True))
+        self.assertFalse(matches(Path('/home/michael/keep.tmp'), is_dir=True))
+        self.assertTrue(matches('/home/michael/keep.tmp/', is_dir=False))
+
+    def test_file_and_directory_pattern_with_hint(self):
+        matches = parse_gitignore_str('*.tmp\n!keep.tmp', base_dir='/home/michael')
+        self.assertTrue(matches('/home/michael/other.tmp', is_dir=True))
+        self.assertTrue(matches('/home/michael/other.tmp', is_dir=False))
+        self.assertFalse(matches('/home/michael/keep.tmp', is_dir=True))
+        self.assertFalse(matches('/home/michael/keep.tmp', is_dir=False))
+
+    def test_directory_only_hint_when_parsing_file(self):
+        with patch('builtins.open', mock_open(read_data='build*/\n!keep')):
+            matches = parse_gitignore('/home/michael/.gitignore')
+        self.assertFalse(matches('/home/michael/build.sh', is_dir=False))
+        self.assertTrue(matches('/home/michael/build', is_dir=True))
+
     def test_negation(self):
         matches = parse_gitignore_str(
             '''

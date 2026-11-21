@@ -39,6 +39,23 @@ Alternatively, you can use the `parse_gitignore_str` function:
     >>> matches('/home/michael/project/main.pyc')
     True
 
+The matcher does not query the filesystem. By default it matches paths without
+knowing whether they refer to files or directories. Pass `is_dir=True` or
+`is_dir=False` to distinguish them when using directory-only patterns:
+
+    >>> matches = parse_gitignore_str('build*/', base_dir='/home/michael/project')
+    >>> matches('/home/michael/project/build.sh', is_dir=False)
+    False
+    >>> matches('/home/michael/project/build_debug', is_dir=True)
+    True
+    >>> matches('/home/michael/project/build_debug/main.c', is_dir=False)
+    True
+
+The optional hint works with both parsers and with string or `pathlib.Path`
+arguments. It also applies to directory-only negations such as `!build/` and
+overrides any trailing slash on the path. Omitting it preserves the existing
+path-only behavior.
+
 ## Motivation
 
 I couldn't find a good library for doing the above on PyPI. There are
