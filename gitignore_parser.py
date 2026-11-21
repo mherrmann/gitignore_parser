@@ -7,9 +7,9 @@ from pathlib import Path
 import sys
 from typing import Reversible, Union
 
-def handle_negation(file_path, rules: Reversible["IgnoreRule"]):
+def handle_negation(file_path, rules: Reversible["IgnoreRule"], is_dir=None):
     for rule in reversed(rules):
-        if rule.match(file_path):
+        if rule.match(file_path, is_dir=is_dir):
             return not rule.negation
     return False
 
@@ -33,11 +33,13 @@ def _parse_gitignore_lines(lines, full_path, base_dir):
         if rule:
             rules.append(rule)
     if not any(r.negation for r in rules):
-        return lambda file_path: any(r.match(file_path) for r in rules)
+        return lambda file_path, is_dir=None: any(
+            r.match(file_path, is_dir=is_dir) for r in rules)
     else:
         # We have negation rules. We can't use a simple "any" to evaluate them.
         # Later rules override earlier rules.
-        return lambda file_path: handle_negation(file_path, rules)
+        return lambda file_path, is_dir=None: handle_negation(
+            file_path, rules, is_dir=is_dir)
 
 def rule_from_pattern(pattern, base_path=None, source=None):
     """
@@ -127,8 +129,7 @@ class IgnoreRule(collections.namedtuple('IgnoreRule_', IGNORE_RULE_FIELDS)):
     def __repr__(self):
         return ''.join(['IgnoreRule(\'', self.pattern, '\')'])
 
-    def match(self, abs_path: Union[str, Path]):
-        matched = False
+    def match(self, abs_path: Union[str, Path], is_dir=None):
         if self.base_path:
             rel_path = _normalize_path(abs_path).relative_to(self.base_path).as_posix()
         else:
@@ -140,13 +141,20 @@ class IgnoreRule(collections.namedtuple('IgnoreRule_', IGNORE_RULE_FIELDS)):
             rel_path += '.' * _count_trailing_symbol('.', abs_path)
         # Path() strips the trailing slash, so we need to preserve it
         # in case of directory-only negation
-        if self.negation and type(abs_path) == str and abs_path[-1] == '/':
+        if self.negation and (
+            (is_dir is True and self.directory_only) or
+            (is_dir is None and type(abs_path) == str and abs_path.endswith('/'))
+        ):
             rel_path += '/'
         if rel_path.startswith('./'):
             rel_path = rel_path[2:]
-        if re.search(self.regex, rel_path):
-            matched = True
-        return matched
+        match = re.search(self.regex, rel_path)
+        if not match:
+            return False
+        # A directory-only rule can match an ancestor of a file, but not
+        # the file's final path component.
+        return not (self.directory_only and is_dir is False and
+                    match.end() == len(rel_path))
 
 
 # Frustratingly, python's fnmatch doesn't provide the FNM_PATHNAME
